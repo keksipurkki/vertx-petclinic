@@ -6,8 +6,8 @@ import io.vertx.ext.web.RoutingContext;
 
 public enum ApiOperation implements Handler<RoutingContext> {
 
-    HELLO(api -> api.greet()),
-    MEET(api -> api.meet());
+    HELLO(null),
+    MEET(null);
 
     ApiOperation(ApiOperationHandler<?> handler) {
         this.handler = handler;
