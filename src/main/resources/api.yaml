@@ -36,7 +36,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FutureApiMessage'
+                $ref: '#/components/schemas/ApiMessage'
   /user/createWithList:
     post:
       tags:
@@ -55,7 +55,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FutureApiMessage'
+                $ref: '#/components/schemas/ApiMessage'
   /user/{username}:
     get:
       tags:
@@ -73,7 +73,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FutureUser'
+                $ref: '#/components/schemas/User'
     put:
       tags:
       - user
@@ -95,7 +95,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FutureUser'
+                $ref: '#/components/schemas/User'
     delete:
       tags:
       - user
@@ -112,7 +112,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FutureApiMessage'
+                $ref: '#/components/schemas/ApiMessage'
   /user/login:
     get:
       tags:
@@ -133,7 +133,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FutureLoginToken'
+                $ref: '#/components/schemas/LoginToken'
   /user/logout:
     get:
       tags:
@@ -150,29 +150,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FutureLoginToken'
+                $ref: '#/components/schemas/LoginToken'
 components:
   schemas:
-    FutureApiMessage:
+    ApiMessage:
       type: object
       properties:
-        complete:
-          type: boolean
+        message:
+          type: string
     User:
       type: object
       properties:
         username:
           type: string
-    FutureUser:
-      type: object
-      properties:
-        complete:
-          type: boolean
-    FutureLoginToken:
-      type: object
-      properties:
-        complete:
-          type: boolean
     LoginToken:
       type: object
       properties:

@@ -96,6 +96,7 @@
           <outputPath>${project.basedir}/src/main/resources</outputPath>
           <resourcePackages>net.keksipurkki.petstore.api</resourcePackages>
           <outputFormat>YAML</outputFormat>
+          <modelConverterClasses>net.keksipurkki.petstore.support.FutureModelConverter</modelConverterClasses>
         </configuration>
         <executions>
           <execution>
