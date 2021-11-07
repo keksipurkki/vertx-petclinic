@@ -1,20 +1,20 @@
-package net.keksipurkki.petstore.service;
+package net.keksipurkki.petstore.http;
 
 import net.keksipurkki.petstore.api.ApiException;
 
-public class UserException extends ApiException {
+public class ForbiddenException extends ApiException {
 
-    public UserException(String message) {
+    public ForbiddenException(String message) {
         super(message);
     }
 
     @Override
     public int getStatusCode() {
-        return 400;
+        return 403;
     }
 
     @Override
     public String getDetail() {
-        return getMessage();
+        return null;
     }
 }

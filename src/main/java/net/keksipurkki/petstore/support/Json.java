@@ -15,13 +15,13 @@ public final class Json {
     private Json() {
     }
 
-    private static ObjectMapper om;
+    private static final ObjectMapper om;
 
     static {
         om = new ObjectMapper();
         om.setSerializationInclusion(JsonInclude.Include.NON_NULL); // JavaScript undefined semantics
         om.addMixIn(JsonObject.class, JsonObjectMixin.class)
-          .addMixIn(JsonArray.class, JsonArrayMixin.class);
+            .addMixIn(JsonArray.class, JsonArrayMixin.class);
         // .. Apply object mapper configuration
     }
 
@@ -46,9 +46,9 @@ public final class Json {
         return om.convertValue(json, target);
     }
 
-    public static <T> T parse(String jsonString, Class<T> target) {
-        var json = new JsonObject(jsonString);
-        return parse(json, target);
+    public static <T> List<T> parse(JsonArray array, Class<T[]> target) {
+        var raw = om.convertValue(array, target);
+        return List.of(raw);
     }
 
     private static abstract class JsonObjectMixin {

@@ -6,9 +6,9 @@ import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.servers.Server;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.vertx.core.Future;
-import net.keksipurkki.petstore.dto.ApiMessage;
-import net.keksipurkki.petstore.dto.LoginToken;
-import net.keksipurkki.petstore.dto.User;
+import net.keksipurkki.petstore.model.LoginToken;
+import net.keksipurkki.petstore.model.User;
+import net.keksipurkki.petstore.model.UserRecord;
 
 import javax.ws.rs.*;
 import java.util.List;
@@ -27,7 +27,7 @@ import java.util.List;
             """
     ),
     servers = {
-        @Server(url = "http://localhost:8080/petclinic/v1")
+        @Server(url = "http://localhost:8080/petstore/v1")
     },
     tags = {
         @Tag(name = "pet", description = "Everything about your pets"),
@@ -47,7 +47,7 @@ public interface ApiContract {
         operationId = "CREATE_USER",
         tags = {"user"}
     )
-    Future<ApiMessage> createUser(User user);
+    Future<ApiMessage> createUser(UserRecord user);
 
     @Path("/user/createWithList")
     @POST
@@ -55,7 +55,7 @@ public interface ApiContract {
         operationId = "CREATE_USER_LIST",
         tags = {"user"}
     )
-    Future<ApiMessage> createWithList(List<User> userList);
+    Future<ApiMessage> createWithList(List<UserRecord> userList);
 
     @Path("/user/{username}")
     @GET
@@ -71,7 +71,7 @@ public interface ApiContract {
         operationId = "UPDATE_USER",
         tags = {"user"}
     )
-    Future<User> updateUser(@PathParam("username") String username, User user);
+    Future<User> updateUser(@PathParam("username") String username, UserRecord user);
 
     @Path("/user/{username}")
     @DELETE
@@ -87,7 +87,7 @@ public interface ApiContract {
         operationId = "LOGIN_USER",
         tags = {"user"}
     )
-    Future<LoginToken> loginUser(@QueryParam("username") String username, @QueryParam("password") String password);
+    Future<LoginToken> login(@QueryParam("username") String username, @QueryParam("password") String password);
 
     @Path("/user/logout")
     @GET
@@ -95,6 +95,6 @@ public interface ApiContract {
         operationId = "LOGOUT_USER",
         tags = {"user"}
     )
-    Future<LoginToken> logout(LoginToken token);
+    Future<ApiMessage> logout(LoginToken token);
 
 }

@@ -48,7 +48,7 @@ public class Main extends AbstractVerticle {
                 if (ar.failed()) {
                     promise.fail(ar.cause());
                 } else {
-                    var port = ar.result().actualPort();
+                    var port = server.getPort();
                     logger.info("Server is now running at http://localhost:{}", port);
                     promise.complete();
                 }

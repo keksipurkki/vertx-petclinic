@@ -95,18 +95,18 @@ public class FailureHandler implements Handler<RoutingContext> {
         failure.setInstance(URI.create(rc.request().absoluteURI()));
 
         rc.response()
-          .setStatusCode(failure.getStatusCode())
-          .putHeader("content-type", ApiException.MEDIA_TYPE)
-          .end(Json.stringify(failure, true));
+            .setStatusCode(failure.getStatusCode())
+            .putHeader("content-type", ApiException.MEDIA_TYPE)
+            .end(Json.stringify(failure, true));
     }
 
     protected void safeErrorResponse(RoutingContext rc, Throwable failure) {
         var internalServerError = new UnexpectedApiException("Internal server error", failure);
 
         rc.response()
-          .setStatusCode(500)
-          .putHeader("content-type", ApiException.MEDIA_TYPE)
-          .end(Json.stringify(internalServerError, true));
+            .setStatusCode(500)
+            .putHeader("content-type", ApiException.MEDIA_TYPE)
+            .end(Json.stringify(internalServerError, true));
     }
 
     @FunctionalInterface

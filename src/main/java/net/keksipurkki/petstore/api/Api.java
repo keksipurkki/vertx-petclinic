@@ -1,13 +1,15 @@
 package net.keksipurkki.petstore.api;
 
 import io.vertx.core.Future;
-import net.keksipurkki.petstore.dto.ApiMessage;
-import net.keksipurkki.petstore.dto.LoginToken;
-import net.keksipurkki.petstore.dto.User;
 import net.keksipurkki.petstore.http.NotFoundException;
-import net.keksipurkki.petstore.http.NotImplementedException;
+import net.keksipurkki.petstore.model.LoginToken;
+import net.keksipurkki.petstore.model.User;
+import net.keksipurkki.petstore.model.UserException;
+import net.keksipurkki.petstore.model.UserRecord;
 import net.keksipurkki.petstore.service.Users;
+import net.keksipurkki.petstore.support.Futures;
 
+import javax.ws.rs.ForbiddenException;
 import java.util.List;
 
 import static java.util.Objects.requireNonNull;
@@ -17,16 +19,28 @@ public class Api implements ApiContract {
     private Users users;
 
     @Override
-    public Future<ApiMessage> createUser(User user) {
-        return users.create(user).map(v -> {
-            var message = "User " + user.username() + " created successfully";
+    public Future<ApiMessage> createUser(UserRecord data) {
+        return users.create(data).map(v -> {
+            var message = "User " + data.username() + " created successfully";
             return new ApiMessage(message);
         });
     }
 
     @Override
-    public Future<ApiMessage> createWithList(List<User> userList) {
-        return Future.failedFuture(new NotImplementedException());
+    public Future<ApiMessage> createWithList(List<UserRecord> userList) {
+
+        if (!User.areUnique(userList)) {
+            throw new UserException("Input contains duplicate users");
+        }
+
+        var future = userList
+            .stream()
+            .map(this::createUser)
+            .collect(Futures.collector());
+
+        return future
+            .map(messages -> new ApiMessage("Created " + messages.size() + " users successfully"));
+
     }
 
     @Override
@@ -40,26 +54,44 @@ public class Api implements ApiContract {
     }
 
     @Override
-    public Future<User> updateUser(String username, User user) {
-        return getUserByName(username).flatMap(existing -> users.update(existing, user));
+    public Future<User> updateUser(String username, UserRecord data) {
+        return getUserByName(username)
+            .flatMap(existing -> users.update(username, data));
     }
 
     @Override
     public Future<ApiMessage> deleteUser(String username) {
-        var deletion = getUserByName(username).flatMap(user -> users.delete(user));
-        return deletion.map(v -> new ApiMessage("User " + username + "deleted successfully"));
-    }
+        return users.delete(username).map(user -> {
 
-    @Override
-    public Future<LoginToken> loginUser(String username, String password) {
-        return getUserByName(username).flatMap(user -> {
-            return users.login(user, LoginToken.from(username, password));
+            if (user.isEmpty()) {
+                throw new UserException("Attempted to delete a nonexistent user");
+            }
+
+            var message = "User " + user.get().record().username() + " deleted successfully";
+            return new ApiMessage(message);
+
         });
     }
 
     @Override
-    public Future<LoginToken> logout(LoginToken token) {
-        return users.logout(token);
+    public Future<LoginToken> login(String username, String password) {
+        return getUserByName(username).flatMap(user -> {
+
+            if (!user.verifyPassword(password)) {
+                throw new ForbiddenException("Invalid password");
+            }
+
+            return users.login(user).map(u -> LoginToken.from(u.record().username()));
+
+        });
+    }
+
+    @Override
+    public Future<ApiMessage> logout(LoginToken token) {
+        var username = token.verifiedSubject();
+        return getUserByName(username)
+            .flatMap(user -> users.logout(user))
+            .map(user -> new ApiMessage("User logged out"));
     }
 
     public Api withUsers(Users users) {

@@ -17,7 +17,7 @@ import static java.util.Objects.requireNonNull;
 
 public class HttpVerticle extends AbstractVerticle {
 
-    public static String CONTEXT_PATH = "/petclinic/v1";
+    public static String CONTEXT_PATH = "/petstore/v1";
     public static String DIAGNOSTICS_PATH = "/_diagnostics";
 
     private final static Logger logger = LoggerFactory.getLogger(HttpVerticle.class);
@@ -146,6 +146,11 @@ public class HttpVerticle extends AbstractVerticle {
             logger.info("Server will bind to port {}", port);
             server.listen(port).onSuccess(p::complete).onFailure(p::fail);
         });
+    }
+
+    public int getPort() {
+        requireNonNull(server, "Server has not been deployed yet");
+        return server.actualPort();
     }
 
 }

@@ -10,26 +10,26 @@ info:
 
   version: 1.0.0
 servers:
-- url: http://localhost:8080/petclinic/v1
-  variables: {}
+  - url: http://localhost:8080/petstore/v1
+    variables: { }
 tags:
-- name: pet
-  description: Everything about your pets
-- name: store
-  description: Access to Petstore orders
-- name: user
-  description: Operations about user
+  - name: pet
+    description: Everything about your pets
+  - name: store
+    description: Access to Petstore orders
+  - name: user
+    description: Operations about user
 paths:
   /user:
     post:
       tags:
-      - user
+        - user
       operationId: CREATE_USER
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: '#/components/schemas/UserRecord'
       responses:
         default:
           description: default response
@@ -40,7 +40,7 @@ paths:
   /user/createWithList:
     post:
       tags:
-      - user
+        - user
       operationId: CREATE_USER_LIST
       requestBody:
         content:
@@ -48,7 +48,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/UserRecord'
       responses:
         default:
           description: default response
@@ -59,14 +59,14 @@ paths:
   /user/{username}:
     get:
       tags:
-      - user
+        - user
       operationId: GET_USER_BY_NAME
       parameters:
-      - name: username
-        in: path
-        required: true
-        schema:
-          type: string
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
         default:
           description: default response
@@ -76,19 +76,19 @@ paths:
                 $ref: '#/components/schemas/User'
     put:
       tags:
-      - user
+        - user
       operationId: UPDATE_USER
       parameters:
-      - name: username
-        in: path
-        required: true
-        schema:
-          type: string
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: '#/components/schemas/UserRecord'
       responses:
         default:
           description: default response
@@ -98,14 +98,14 @@ paths:
                 $ref: '#/components/schemas/User'
     delete:
       tags:
-      - user
+        - user
       operationId: DELETE_USER
       parameters:
-      - name: username
-        in: path
-        required: true
-        schema:
-          type: string
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
         default:
           description: default response
@@ -116,17 +116,17 @@ paths:
   /user/login:
     get:
       tags:
-      - user
+        - user
       operationId: LOGIN_USER
       parameters:
-      - name: username
-        in: query
-        schema:
-          type: string
-      - name: password
-        in: query
-        schema:
-          type: string
+        - name: username
+          in: query
+          schema:
+            type: string
+        - name: password
+          in: query
+          schema:
+            type: string
       responses:
         default:
           description: default response
@@ -137,7 +137,7 @@ paths:
   /user/logout:
     get:
       tags:
-      - user
+        - user
       operationId: LOGOUT_USER
       requestBody:
         content:
@@ -150,7 +150,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LoginToken'
+                $ref: '#/components/schemas/ApiMessage'
 components:
   schemas:
     ApiMessage:
@@ -158,11 +158,30 @@ components:
       properties:
         message:
           type: string
-    User:
+    UserRecord:
+      required:
+        - email
+        - firstName
+        - lastName
+        - password
+        - username
       type: object
       properties:
         username:
           type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        phone:
+          type: string
+      description: User data
+    User:
+      type: object
     LoginToken:
       type: object
       properties:

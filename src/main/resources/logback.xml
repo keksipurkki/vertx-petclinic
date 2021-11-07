@@ -1,17 +1,17 @@
 <configuration>
 
-  <appender name="TECH" class="ch.qos.logback.core.ConsoleAppender">
-    <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
-      <layout class="net.keksipurkki.petstore.support.JsonLineLayout">
-        <prettyPrint>true</prettyPrint>
-      </layout>
-    </encoder>
-  </appender>
+    <appender name="TECH" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <layout class="net.keksipurkki.petstore.support.JsonLineLayout">
+                <prettyPrint>true</prettyPrint>
+            </layout>
+        </encoder>
+    </appender>
 
-  <logger name="net.keksipurkki" level="DEBUG"/>
+    <logger name="net.keksipurkki" level="DEBUG"/>
 
-  <root level="INFO">
-    <appender-ref ref="TECH"/>
-  </root>
+    <root level="INFO">
+        <appender-ref ref="TECH"/>
+    </root>
 
 </configuration>

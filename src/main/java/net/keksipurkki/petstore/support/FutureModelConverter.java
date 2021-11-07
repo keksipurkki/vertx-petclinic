@@ -1,7 +1,6 @@
 package net.keksipurkki.petstore.support;
 
 import com.fasterxml.jackson.databind.JavaType;
-
 import io.swagger.v3.core.converter.AnnotatedType;
 import io.swagger.v3.core.converter.ModelConverter;
 import io.swagger.v3.core.converter.ModelConverterContext;
@@ -13,12 +12,10 @@ import java.util.Iterator;
 import java.util.Optional;
 
 /**
- *
  * Patch OpenAPI specification generator to play nice with Vert.x Futures
- *
+ * <p>
  * Whenever an API operation produces a Future<T>, the converter
  * extracts T and maps it to a schema under '#/components/schemas/T'
- *
  */
 public class FutureModelConverter implements ModelConverter {
 
@@ -40,7 +37,7 @@ public class FutureModelConverter implements ModelConverter {
     @Override
     public Schema<?> resolve(AnnotatedType type, ModelConverterContext context, Iterator<ModelConverter> chain) {
         return Optional.ofNullable(chain.next())
-                .map(c -> c.resolve(futureValue(type), context, chain))
-                .orElse(null);
+            .map(c -> c.resolve(futureValue(type), context, chain))
+            .orElse(null);
     }
 }
