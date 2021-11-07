@@ -3,8 +3,8 @@ package net.keksipurkki.petstore.service;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import net.keksipurkki.petstore.model.User;
+import net.keksipurkki.petstore.model.UserData;
 import net.keksipurkki.petstore.model.UserException;
-import net.keksipurkki.petstore.model.UserRecord;
 
 import java.util.Optional;
 
@@ -16,7 +16,7 @@ class UsersImpl implements Users {
     }
 
     @Override
-    public Future<User> create(UserRecord data) {
+    public Future<User> create(UserData data) {
         return this.findByUsername(data.username()).flatMap(opt -> {
             if (opt.isPresent()) {
                 throw new UserException("Username " + data.username() + " already exists");
@@ -31,22 +31,14 @@ class UsersImpl implements Users {
     }
 
     @Override
-    public Future<User> update(String username, UserRecord update) {
+    public Future<User> update(String username, UserData update) {
         return Future.succeededFuture(User.updatedUser(username, update));
     }
 
     @Override
-    public Future<Optional<User>> delete(String username) {
-        return Future.succeededFuture(User.deletedUser(username));
+    public Future<Void> delete(User user) {
+        return Future.succeededFuture(User.deletedUser(user.getData().username()))
+                     .map(v -> null);
     }
 
-    @Override
-    public Future<User> login(User user) {
-        return Future.succeededFuture(User.login(user));
-    }
-
-    @Override
-    public Future<User> logout(User user) {
-        return Future.succeededFuture(User.logout(user));
-    }
 }

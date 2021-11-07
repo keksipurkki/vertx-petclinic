@@ -3,8 +3,6 @@ package net.keksipurkki.petstore.http;
 import io.vertx.core.*;
 import io.vertx.core.http.HttpServer;
 import io.vertx.ext.web.Router;
-import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.handler.AuthenticationHandler;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import io.vertx.ext.web.openapi.RouterBuilderOptions;
 import io.vertx.ext.web.validation.BadRequestException;
@@ -23,7 +21,6 @@ public class HttpVerticle extends AbstractVerticle {
     private final static Logger logger = LoggerFactory.getLogger(HttpVerticle.class);
 
     private HttpServer server;
-    private Api api;
 
     @Override
     final public void start(Promise<Void> promise) {
@@ -31,10 +28,10 @@ public class HttpVerticle extends AbstractVerticle {
         logger.info("Reading OpenAPI specification from {}", openapi);
 
         RouterBuilder.create(vertx, openapi)
-            .map(this::setOptions)
-            .map(this::createRouter)
-            .map(this::createServer)
-            .onComplete(done(promise));
+                     .map(this::setOptions)
+                     .map(this::createRouter)
+                     .map(this::createServer)
+                     .onComplete(done(promise));
     }
 
     private RouterBuilder setOptions(RouterBuilder builder) {
@@ -60,10 +57,10 @@ public class HttpVerticle extends AbstractVerticle {
             var operation = ApiOperation.from(route.getOperationId());
 
             builder.operation(operation.name())
-                .handler(Middlewares.defaultHeaders())
-                .handler(Middlewares.requestTracing(System.getenv()))
-                .handler(createAuthHandler(operation))
-                .handler(operation.withApi(api));
+                   .handler(Middlewares.defaultHeaders())
+                   .handler(Middlewares.requestTracing(System.getenv()))
+                   .handler(Middlewares.jwtVerification(operation))
+                   .handler(operation.withApi(api));
         }
 
         return builder.createRouter();
@@ -93,8 +90,11 @@ public class HttpVerticle extends AbstractVerticle {
     public FailureHandler createFailureHandler() {
         var failureHandler = new FailureHandler();
 
-        // Vert.x Validation Service
+        // OpenAPI schema violation as per Vert.x Validation Service
         failureHandler.on(BadRequestException.class, cause -> new ApiContractException("Bad request", cause));
+
+        // Authentication related problems
+        failureHandler.on(SecurityException.class, cause -> new UnauthorizedException("Unauthorized", cause));
 
         // Fallback
         failureHandler.on(ApiException.class, e -> e);
@@ -103,10 +103,6 @@ public class HttpVerticle extends AbstractVerticle {
         failureHandler.on(Throwable.class, cause -> new UnexpectedApiException("Internal server error", cause));
 
         return failureHandler;
-    }
-
-    public AuthenticationHandler createAuthHandler(ApiOperation operation) {
-        return RoutingContext::next;
     }
 
     private String wildcard(String path) {

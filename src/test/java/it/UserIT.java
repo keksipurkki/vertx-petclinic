@@ -7,7 +7,8 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import net.keksipurkki.petstore.api.ApiMessage;
 import net.keksipurkki.petstore.http.HttpVerticle;
-import net.keksipurkki.petstore.model.UserRecord;
+import net.keksipurkki.petstore.model.User;
+import net.keksipurkki.petstore.model.UserData;
 import net.keksipurkki.petstore.support.Json;
 import org.junit.jupiter.api.*;
 
@@ -16,12 +17,31 @@ import java.util.concurrent.TimeUnit;
 
 import static it.Tests.await;
 import static it.Tests.randomPort;
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 
 @Timeout(value = 30, unit = TimeUnit.SECONDS)
 public class UserIT {
+
+    private static final UserData ALICE = new UserData(
+        "Alice",
+        "Alice",
+        "Johnson",
+        "email@email.com",
+        "password",
+        null
+    );
+
+    private static final UserData BOB = new UserData(
+        "Bob",
+        "Bob",
+        "Builder",
+        "email@email.com",
+        "password",
+        null
+    );
 
     @BeforeAll
     @DisplayName("Server starts")
@@ -40,23 +60,19 @@ public class UserIT {
         RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
     }
 
+    @AfterEach
+    public void cleanUp() {
+        User.clear();
+    }
+
     @Test
     @DisplayName("Create a single user — happy path")
     public void createUser_validBody_responseMatchesSpec() {
 
-        var expected = new UserRecord(
-            "EXPECTED",
-            "User",
-            "Name",
-            "email@email.com",
-            "password",
-            null
-        );
-
         var resp = RestAssured
             .given()
             .header("content-type", "application/json")
-            .body(Json.stringify(expected, true))
+            .body(Json.stringify(ALICE, true))
             .post("/user");
 
         Assertions.assertEquals(200, resp.statusCode());
@@ -64,7 +80,7 @@ public class UserIT {
         var json = new JsonObject(resp.asString());
         var actual = Json.parse(json, ApiMessage.class);
 
-        Assertions.assertEquals("User EXPECTED created successfully", actual.message());
+        Assertions.assertEquals("User Alice created successfully", actual.message());
 
     }
 
@@ -72,7 +88,7 @@ public class UserIT {
     @DisplayName("Create a single user — sad path — missing required data")
     public void createUser_invalidBody_expectedErrorMessage() {
 
-        var user = new UserRecord(
+        var passwordMissing = new UserData(
             "username",
             "User",
             "Name",
@@ -84,7 +100,7 @@ public class UserIT {
         var resp = RestAssured
             .given()
             .header("content-type", "application/json")
-            .body(Json.stringify(user, true))
+            .body(Json.stringify(passwordMissing, true))
             .post("/user");
 
         Assertions.assertEquals(400, resp.statusCode());
@@ -100,25 +116,7 @@ public class UserIT {
     @DisplayName("Create multiple users — happy path")
     public void createWithList_validInput_expectedApiMessage() {
 
-        var alice = new UserRecord(
-            "alice",
-            "User",
-            "Name",
-            "email@email.com",
-            "password",
-            null
-        );
-
-        var bob = new UserRecord(
-            "bob",
-            "User",
-            "Name",
-            "email@email.com",
-            "password",
-            null
-        );
-
-        var list = List.of(alice, bob);
+        var list = List.of(ALICE, BOB);
 
         var resp = RestAssured
             .given()
@@ -139,16 +137,7 @@ public class UserIT {
     @DisplayName("Create multiple users — sad path — duplicate data")
     public void createWithList_duplicateInput_expectedError() {
 
-        var alice = new UserRecord(
-            "alice",
-            "User",
-            "Name",
-            "email@email.com",
-            "password",
-            null
-        );
-
-        var list = List.of(alice, alice);
+        var list = List.of(ALICE, ALICE);
 
         var resp = RestAssured
             .given()
@@ -156,7 +145,7 @@ public class UserIT {
             .body(Json.stringify(list, true))
             .post("/user/createWithList");
 
-        Assertions.assertEquals(200, resp.statusCode());
+        Assertions.assertEquals(400, resp.statusCode());
 
         var json = new JsonObject(resp.asString());
 
@@ -164,4 +153,113 @@ public class UserIT {
         assertThat(json.getString("detail"), is(expected));
 
     }
+
+    @Test
+    @DisplayName("User lifecycle — happy path")
+    public void crud_happyPath_expectedOutcome() {
+        var user = ALICE;
+
+        // Create
+        {
+            var resp = RestAssured
+                .given()
+                .header("content-type", "application/json")
+                .body(Json.stringify(user, true))
+                .post("/user");
+
+            assertThat(resp.statusCode(), equalTo(200));
+        }
+
+        // Read
+        {
+
+            var resp = RestAssured
+                .given()
+                .accept("application/json")
+                .get("/user/{username}", user.username());
+
+            assertThat(resp.statusCode(), equalTo(200));
+
+            var actual = new JsonObject(resp.asString());
+            var expected = JsonObject.mapFrom(user);
+
+            assertThat(expected, equalTo(actual.getJsonObject("data")));
+
+        }
+
+        // Login
+        String token;
+        {
+
+            var resp = RestAssured
+                .given()
+                .accept("application/json")
+                .queryParam("username", user.username())
+                .queryParam("password", user.password())
+                .get("/user/login/");
+
+            assertThat(resp.statusCode(), equalTo(200));
+
+            var json = new JsonObject(resp.asString());
+            token = json.getString("token");
+            assertThat(token, is(not(nullValue())));
+
+        }
+
+        // Update
+        {
+
+            var update = new UserData(
+                "Alice",
+                "Alice",
+                "Bronson",
+                "email@email.com",
+                "password",
+                null
+            );
+
+            var resp = RestAssured
+                .given()
+                .contentType("application/json")
+                .header("authorization", "Bearer " + token)
+                .body(Json.stringify(update, true))
+                .put("/user/{username}", user.username());
+
+            assertThat(resp.statusCode(), equalTo(200));
+
+            var actual = new JsonObject(resp.asString());
+            var expected = JsonObject.mapFrom(user);
+
+            assertThat(expected, not(equalTo(actual.getJsonObject("data"))));
+            assertThat("Bronson", equalTo(actual.getJsonObject("data").getString("lastName")));
+
+        }
+
+        // Delete
+        {
+
+            var resp = RestAssured
+                .given()
+                .contentType("application/json")
+                .header("authorization", "Bearer " + token)
+                .delete("/user/{username}", user.username());
+
+            assertThat(resp.statusCode(), equalTo(200));
+
+        }
+
+        // End
+        {
+
+            var resp = RestAssured
+                .given()
+                .accept("application/json")
+                .get("/user/{username}", user.username());
+
+            assertThat(resp.statusCode(), equalTo(404));
+
+        }
+
+    }
+
 }

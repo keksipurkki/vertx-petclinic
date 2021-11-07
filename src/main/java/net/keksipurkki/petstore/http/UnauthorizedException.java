@@ -1,11 +1,15 @@
-package net.keksipurkki.petstore.model;
+package net.keksipurkki.petstore.http;
 
 import net.keksipurkki.petstore.api.ApiException;
 
-public class TokenException extends ApiException {
+public class UnauthorizedException extends ApiException {
 
-    public TokenException(String message, Throwable cause) {
+    public UnauthorizedException(String message, Throwable cause) {
         super(message, cause);
+    }
+
+    public UnauthorizedException(String message) {
+        super(message, null);
     }
 
     @Override

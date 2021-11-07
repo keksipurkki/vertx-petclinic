@@ -5,6 +5,14 @@ import io.vertx.core.json.JsonObject;
 
 import java.net.URI;
 
+/**
+ *
+ * An exception that serializes to the application/problem+json media type
+ *
+ * All non-2xx responses of the API must conform to this media type
+ *
+ * @see "https://datatracker.ietf.org/doc/html/rfc7807"
+ */
 public abstract class ApiException extends RuntimeException {
 
     public static final String MEDIA_TYPE = "application/problem+json";

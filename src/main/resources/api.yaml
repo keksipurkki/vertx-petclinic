@@ -10,26 +10,26 @@ info:
 
   version: 1.0.0
 servers:
-  - url: http://localhost:8080/petstore/v1
-    variables: { }
+- url: http://localhost:8080/petstore/v1
+  variables: {}
 tags:
-  - name: pet
-    description: Everything about your pets
-  - name: store
-    description: Access to Petstore orders
-  - name: user
-    description: Operations about user
+- name: pet
+  description: Everything about your pets
+- name: store
+  description: Access to Petstore orders
+- name: user
+  description: Operations about user
 paths:
   /user:
     post:
       tags:
-        - user
+      - user
       operationId: CREATE_USER
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserRecord'
+              $ref: '#/components/schemas/UserData'
       responses:
         default:
           description: default response
@@ -37,10 +37,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiMessage'
+      security:
+      - NONE: []
   /user/createWithList:
     post:
       tags:
-        - user
+      - user
       operationId: CREATE_USER_LIST
       requestBody:
         content:
@@ -48,7 +50,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/UserRecord'
+                $ref: '#/components/schemas/UserData'
       responses:
         default:
           description: default response
@@ -56,17 +58,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiMessage'
+      security:
+      - NONE: []
   /user/{username}:
     get:
       tags:
-        - user
+      - user
       operationId: GET_USER_BY_NAME
       parameters:
-        - name: username
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: username
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
         default:
           description: default response
@@ -74,21 +78,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
+      security:
+      - NONE: []
     put:
       tags:
-        - user
+      - user
       operationId: UPDATE_USER
       parameters:
-        - name: username
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: username
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserRecord'
+              $ref: '#/components/schemas/UserData'
       responses:
         default:
           description: default response
@@ -96,16 +102,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
+      security:
+      - LOGIN_SESSION: []
     delete:
       tags:
-        - user
+      - user
       operationId: DELETE_USER
       parameters:
-        - name: username
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: username
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
         default:
           description: default response
@@ -113,37 +121,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiMessage'
+      security:
+      - LOGIN_SESSION: []
   /user/login:
     get:
       tags:
-        - user
+      - user
       operationId: LOGIN_USER
       parameters:
-        - name: username
-          in: query
-          schema:
-            type: string
-        - name: password
-          in: query
-          schema:
-            type: string
+      - name: username
+        in: query
+        schema:
+          type: string
+      - name: password
+        in: query
+        schema:
+          type: string
       responses:
         default:
           description: default response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LoginToken'
+                $ref: '#/components/schemas/AccessToken'
+      security:
+      - NONE: []
   /user/logout:
     get:
       tags:
-        - user
+      - user
       operationId: LOGOUT_USER
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LoginToken'
       responses:
         default:
           description: default response
@@ -151,6 +158,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiMessage'
+      security:
+      - LOGIN_SESSION: []
 components:
   schemas:
     ApiMessage:
@@ -158,13 +167,13 @@ components:
       properties:
         message:
           type: string
-    UserRecord:
+    UserData:
       required:
-        - email
-        - firstName
-        - lastName
-        - password
-        - username
+      - email
+      - firstName
+      - lastName
+      - password
+      - username
       type: object
       properties:
         username:
@@ -182,8 +191,16 @@ components:
       description: User data
     User:
       type: object
-    LoginToken:
+      properties:
+        data:
+          $ref: '#/components/schemas/UserData'
+    AccessToken:
       type: object
       properties:
         token:
           type: string
+  securitySchemes:
+    LOGIN_SESSION:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

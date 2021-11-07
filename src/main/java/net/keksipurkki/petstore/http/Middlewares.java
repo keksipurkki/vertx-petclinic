@@ -3,6 +3,8 @@ package net.keksipurkki.petstore.http;
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
+import net.keksipurkki.petstore.api.ApiOperation;
+import net.keksipurkki.petstore.security.AuthenticationHandler;
 import net.keksipurkki.petstore.support.VertxMDC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,5 +78,9 @@ public final class Middlewares {
             rc.next();
 
         };
+    }
+
+    public static Handler<RoutingContext> jwtVerification(ApiOperation operation) {
+        return AuthenticationHandler.create(operation);
     }
 }

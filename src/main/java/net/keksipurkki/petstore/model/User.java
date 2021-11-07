@@ -15,37 +15,34 @@ public class User {
     private static final Map<String, User> users = new ConcurrentHashMap<>();
 
     private final int id;
-    private final UserRecord record;
-    private final Status status;
+    private final UserData data;
 
-    private User(int id, UserRecord record) {
+    private User(int id, UserData record) {
         this.id = id;
-        this.record = record;
-        this.status = Status.LOGGED_OUT;
+        this.data = record;
     }
 
-    private User(User user, Status status) {
-        this.id = user.id;
-        this.record = user.record;
-        this.status = status;
-    }
-
-    public static boolean areUnique(List<UserRecord> userList) {
-        var unique = userList.stream().map(UserRecord::username).collect(Collectors.toSet());
+    public static boolean areUnique(List<UserData> userList) {
+        var unique = userList.stream().map(UserData::username).collect(Collectors.toSet());
         return userList.size() == unique.size();
     }
 
-    public UserRecord record() {
-        return record;
+    // :-/
+    public static void clear() {
+        users.clear();
+    }
+
+    public UserData getData() {
+        return data;
     }
 
     public boolean verifyPassword(String password) {
-        return MessageDigest.isEqual(password.getBytes(UTF_8), record.password().getBytes(UTF_8));
+        return MessageDigest.isEqual(password.getBytes(UTF_8), data.password().getBytes(UTF_8));
     }
 
-    public static User newUser(UserRecord data) {
+    public static User newUser(UserData data) {
         var user = new User(counter.getAndIncrement(), data);
-        users.put(user.record.username(), user);
+        users.put(user.data.username(), user);
         return user;
     }
 
@@ -54,7 +51,7 @@ public class User {
         return Optional.ofNullable(user);
     }
 
-    public static User updatedUser(String username, UserRecord update) {
+    public static User updatedUser(String username, UserData update) {
         var existing = existingUser(username);
 
         if (existing.isEmpty()) {
@@ -70,18 +67,6 @@ public class User {
 
     public static Optional<User> deletedUser(String username) {
         return Optional.ofNullable(users.remove(username));
-    }
-
-    public static User login(User user) {
-        var u = new User(user, Status.LOGGED_IN);
-        users.put(user.record.username(), u);
-        return u;
-    }
-
-    public static User logout(User user) {
-        var u = new User(user, Status.LOGGED_OUT);
-        users.put(user.record.username(), u);
-        return u;
     }
 
     public enum Status {
