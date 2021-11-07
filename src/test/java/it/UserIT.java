@@ -8,7 +8,7 @@ import io.vertx.core.json.JsonObject;
 import net.keksipurkki.petstore.api.ApiMessage;
 import net.keksipurkki.petstore.http.HttpVerticle;
 import net.keksipurkki.petstore.model.User;
-import net.keksipurkki.petstore.model.UserData;
+import net.keksipurkki.petstore.service.UsersImpl;
 import net.keksipurkki.petstore.support.Json;
 import org.junit.jupiter.api.*;
 
@@ -25,7 +25,8 @@ import static org.hamcrest.Matchers.not;
 @Timeout(value = 30, unit = TimeUnit.SECONDS)
 public class UserIT {
 
-    private static final UserData ALICE = new UserData(
+    private static final User ALICE = new User(
+        0,
         "Alice",
         "Alice",
         "Johnson",
@@ -34,7 +35,8 @@ public class UserIT {
         null
     );
 
-    private static final UserData BOB = new UserData(
+    private static final User BOB = new User(
+        1,
         "Bob",
         "Bob",
         "Builder",
@@ -62,7 +64,8 @@ public class UserIT {
 
     @AfterEach
     public void cleanUp() {
-        User.clear();
+        // :-/
+        UsersImpl.clear();
     }
 
     @Test
@@ -85,10 +88,39 @@ public class UserIT {
     }
 
     @Test
+    @DisplayName("User response does not contain password")
+    public void createUser_thenGet_passwordIsRedacted() {
+
+        var user = ALICE;
+
+        var creation = RestAssured
+            .given()
+            .header("content-type", "application/json")
+            .body(Json.stringify(user, true))
+            .post("/user");
+
+        Assertions.assertEquals(200, creation.statusCode());
+
+        var retrieval = RestAssured
+            .given()
+            .accept("application/json")
+            .get("/user/{username}", user.username());
+
+        assertThat(retrieval.statusCode(), equalTo(200));
+
+        var json = new JsonObject(retrieval.asString());
+
+        assertThat(json.getString("password"), is(not(equalTo(user.password()))));
+        assertThat(json.getString("password"), is(nullValue()));
+
+    }
+
+    @Test
     @DisplayName("Create a single user — sad path — missing required data")
     public void createUser_invalidBody_expectedErrorMessage() {
 
-        var passwordMissing = new UserData(
+        var passwordMissing = new User(
+            0,
             "username",
             "User",
             "Name",
@@ -183,7 +215,7 @@ public class UserIT {
             var actual = new JsonObject(resp.asString());
             var expected = JsonObject.mapFrom(user);
 
-            assertThat(expected, equalTo(actual.getJsonObject("data")));
+            assertThat(expected.getString("username"), equalTo(actual.getString("username")));
 
         }
 
@@ -209,7 +241,8 @@ public class UserIT {
         // Update
         {
 
-            var update = new UserData(
+            var update = new User(
+                0,
                 "Alice",
                 "Alice",
                 "Bronson",
@@ -231,7 +264,7 @@ public class UserIT {
             var expected = JsonObject.mapFrom(user);
 
             assertThat(expected, not(equalTo(actual.getJsonObject("data"))));
-            assertThat("Bronson", equalTo(actual.getJsonObject("data").getString("lastName")));
+            assertThat("Bronson", equalTo(actual.getString("lastName")));
 
         }
 

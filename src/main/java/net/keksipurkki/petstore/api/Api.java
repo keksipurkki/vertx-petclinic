@@ -5,7 +5,6 @@ import net.keksipurkki.petstore.http.NotFoundException;
 import net.keksipurkki.petstore.http.NotImplementedException;
 import net.keksipurkki.petstore.model.AccessToken;
 import net.keksipurkki.petstore.model.User;
-import net.keksipurkki.petstore.model.UserData;
 import net.keksipurkki.petstore.model.UserException;
 import net.keksipurkki.petstore.security.JwtPrincipal;
 import net.keksipurkki.petstore.security.SecurityContext;
@@ -23,7 +22,7 @@ public class Api implements ApiContract {
     private SecurityContext context;
 
     @Override
-    public Future<ApiMessage> createUser(UserData data) {
+    public Future<ApiMessage> createUser(User data) {
         return users.create(data).map(v -> {
             var message = "User " + data.username() + " created successfully";
             return new ApiMessage(message);
@@ -31,9 +30,9 @@ public class Api implements ApiContract {
     }
 
     @Override
-    public Future<ApiMessage> createWithList(List<UserData> userList) {
+    public Future<ApiMessage> createWithList(List<User> userList) {
 
-        if (!User.areUnique(userList)) {
+        if (!users.areUnique(userList)) {
             throw new UserException("Input contains duplicate users");
         }
 
@@ -49,18 +48,16 @@ public class Api implements ApiContract {
 
     @Override
     public Future<User> getUserByName(String username) {
-        return users.findByUsername(username).map(opt -> {
-            if (opt.isEmpty()) {
-                throw new NotFoundException("User " + username + " does not exist");
-            }
-            return opt.get();
-        });
+        return users.findByUsername(username)
+            .map(opt -> opt.orElseThrow(() -> new NotFoundException("User " + username + " does not exist")))
+            .map(User::redactCredentials);
     }
 
     @Override
-    public Future<User> updateUser(String username, UserData data) {
+    public Future<User> updateUser(String username, User data) {
         return getUserByName(username)
-            .flatMap(existing -> users.update(username, data));
+            .flatMap(existing -> users.update(username, data))
+            .map(User::redactCredentials);
     }
 
     @Override
@@ -75,15 +72,17 @@ public class Api implements ApiContract {
 
     @Override
     public Future<AccessToken> login(String username, String password) {
-        return getUserByName(username).map(user -> {
+        return this.users.findByUsername(username)
+            .map(opt -> opt.orElseThrow(() -> new NotFoundException("User " + username + " does not exist")))
+            .map(user -> {
 
-            if (!user.verifyPassword(password)) {
-                throw new ForbiddenException("Invalid password");
-            }
+                if (!user.verifyPassword(password)) {
+                    throw new ForbiddenException("Invalid password");
+                }
 
-            return JwtPrincipal.from(user.getData().username());
+                return JwtPrincipal.from(user.username());
 
-        }).map(principal -> new AccessToken(principal.getToken()));
+            }).map(principal -> new AccessToken(principal.getToken()));
     }
 
     @Override
@@ -91,7 +90,7 @@ public class Api implements ApiContract {
         throw new NotImplementedException();
     }
 
-    public Api withUsers(Users users) {
+    public Api withUserService(Users users) {
         var clone = new Api();
         clone.users = requireNonNull(users, "Users service must be defined");
         clone.context = context;

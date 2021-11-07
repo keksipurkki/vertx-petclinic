@@ -2,18 +2,18 @@ package net.keksipurkki.petstore.api;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import io.vertx.core.json.JsonObject;
+import net.keksipurkki.petstore.support.CustomJsonSerialization;
 
 import java.net.URI;
 
 /**
- *
  * An exception that serializes to the application/problem+json media type
- *
+ * <p>
  * All non-2xx responses of the API must conform to this media type
  *
  * @see "https://datatracker.ietf.org/doc/html/rfc7807"
  */
-public abstract class ApiException extends RuntimeException {
+public abstract class ApiException extends RuntimeException implements CustomJsonSerialization {
 
     public static final String MEDIA_TYPE = "application/problem+json";
     public static final URI DEFAULT_TYPE = URI.create("about:blank");
@@ -49,6 +49,7 @@ public abstract class ApiException extends RuntimeException {
     }
 
     @JsonValue
+    @Override
     public JsonObject toJson() {
         return new JsonObject()
             .put("type", getType())

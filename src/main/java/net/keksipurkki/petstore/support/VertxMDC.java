@@ -1,10 +1,7 @@
 package net.keksipurkki.petstore.support;
 
+import io.vertx.core.Context;
 import io.vertx.core.Vertx;
-import io.vertx.core.impl.ContextInternal;
-import net.keksipurkki.petstore.http.Middlewares;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,9 +9,11 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import static java.util.Objects.nonNull;
+
 public class VertxMDC {
 
-    private final static Logger logger = LoggerFactory.getLogger(Middlewares.class);
+    private final static String CONTEXT_KEY = VertxMDC.class + "_CONTEXT";
 
     private VertxMDC() {
     }
@@ -22,19 +21,14 @@ public class VertxMDC {
     public static void put(String key, String value) {
         Objects.requireNonNull(key);
         Objects.requireNonNull(value);
-        ContextInternal ctx = (ContextInternal) Vertx.currentContext();
-        if (ctx == null) {
-            if (logger.isTraceEnabled()) {
-                logger.trace("Attempt to set contextual data from a non Vert.x thread", new Exception());
-            }
-        } else {
+        var ctx = Vertx.currentContext();
+        if (ctx != null) {
             contextualDataMap(ctx).put(key, value);
         }
     }
 
     public static String get(String key) {
-        Objects.requireNonNull(key);
-        ContextInternal ctx = (ContextInternal) Vertx.currentContext();
+        var ctx = Vertx.currentContext();
         if (ctx != null) {
             return contextualDataMap(ctx).get(key);
         }
@@ -42,8 +36,7 @@ public class VertxMDC {
     }
 
     public static String getOrDefault(String key, String defaultValue) {
-        Objects.requireNonNull(key);
-        ContextInternal ctx = (ContextInternal) Vertx.currentContext();
+        var ctx = Vertx.currentContext();
         if (ctx != null) {
             return contextualDataMap(ctx).getOrDefault(key, defaultValue);
         }
@@ -51,17 +44,21 @@ public class VertxMDC {
     }
 
     public static Map<String, String> getAll() {
-        ContextInternal ctx = (ContextInternal) Vertx.currentContext();
+        var ctx = Vertx.currentContext();
         if (ctx != null) {
             return new HashMap<>(contextualDataMap(ctx));
         }
         return Map.of();
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public static ConcurrentMap<String, String> contextualDataMap(ContextInternal ctx) {
-        ConcurrentMap<Object, Object> lcd = Objects.requireNonNull(ctx).localContextData();
-        return (ConcurrentMap) lcd.computeIfAbsent(VertxMDC.class, k -> new ConcurrentHashMap());
+    public static ConcurrentMap<String, String> contextualDataMap(Context ctx) {
+        var map = ctx.<ConcurrentMap<String, String>>getLocal(CONTEXT_KEY);
+        if (nonNull(map)) {
+            return map;
+        } else {
+            ctx.putLocal(CONTEXT_KEY, new ConcurrentHashMap<String, String>());
+            return contextualDataMap(ctx);
+        }
     }
 
 }

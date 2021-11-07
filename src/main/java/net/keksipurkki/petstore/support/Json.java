@@ -3,10 +3,10 @@ package net.keksipurkki.petstore.support;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import lombok.SneakyThrows;
 
 import java.util.List;
 import java.util.Map;
@@ -25,15 +25,12 @@ public final class Json {
         // .. Apply object mapper configuration
     }
 
+    @SneakyThrows
     public static <T> String stringify(T input, boolean prettyPrint) {
-        try {
-            if (prettyPrint) {
-                return om.writerWithDefaultPrettyPrinter().writeValueAsString(input);
-            } else {
-                return om.writeValueAsString(input);
-            }
-        } catch (JsonProcessingException cause) {
-            throw new InvalidJsonException("JSON serialization failed", cause);
+        if (prettyPrint) {
+            return om.writerWithDefaultPrettyPrinter().writeValueAsString(input);
+        } else {
+            return om.writeValueAsString(input);
         }
     }
 

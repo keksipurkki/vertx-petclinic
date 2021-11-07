@@ -8,7 +8,6 @@ import static java.util.Objects.isNull;
 
 public final class AuthenticationHandler implements Handler<RoutingContext> {
 
-
     private AuthenticationHandler() {
     }
 

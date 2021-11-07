@@ -81,6 +81,7 @@ public final class Middlewares {
     }
 
     public static Handler<RoutingContext> jwtVerification(ApiOperation operation) {
+        logger.trace("Mounting authentication handler for {}", operation);
         return AuthenticationHandler.create(operation);
     }
 }

@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.vertx.core.Future;
 import net.keksipurkki.petstore.model.AccessToken;
 import net.keksipurkki.petstore.model.User;
-import net.keksipurkki.petstore.model.UserData;
 
 import javax.ws.rs.*;
 import java.util.List;
@@ -52,7 +51,7 @@ public interface ApiContract {
         tags = {"user"},
         security = {@SecurityRequirement(name = "NONE")}
     )
-    Future<ApiMessage> createUser(UserData user);
+    Future<ApiMessage> createUser(User user);
 
     @Path("/user/createWithList")
     @POST
@@ -61,7 +60,7 @@ public interface ApiContract {
         tags = {"user"},
         security = {@SecurityRequirement(name = "NONE")}
     )
-    Future<ApiMessage> createWithList(List<UserData> userList);
+    Future<ApiMessage> createWithList(List<User> userList);
 
     @Path("/user/{username}")
     @GET
@@ -79,7 +78,7 @@ public interface ApiContract {
         tags = {"user"},
         security = {@SecurityRequirement(name = "LOGIN_SESSION")}
     )
-    Future<User> updateUser(@PathParam("username") String username, UserData user);
+    Future<User> updateUser(@PathParam("username") String username, User user);
 
     @Path("/user/{username}")
     @DELETE

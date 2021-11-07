@@ -4,7 +4,7 @@ import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.validation.RequestParameters;
 import io.vertx.ext.web.validation.ValidationHandler;
-import net.keksipurkki.petstore.model.UserData;
+import net.keksipurkki.petstore.model.User;
 import net.keksipurkki.petstore.security.SecurityContext;
 import net.keksipurkki.petstore.security.SecurityScheme;
 import net.keksipurkki.petstore.support.Json;
@@ -16,7 +16,7 @@ import java.util.List;
 import static java.util.Objects.nonNull;
 
 /**
- * Front controller of the API
+ * API Front Controller
  */
 public enum ApiOperation implements Handler<RoutingContext> {
 
@@ -56,7 +56,7 @@ public enum ApiOperation implements Handler<RoutingContext> {
             case LOGOUT_USER -> api.logout();
         };
 
-        operation.onSuccess(rc::json).onFailure(rc::fail).onComplete(ar -> {
+        operation.onSuccess(respond(rc)).onFailure(rc::fail).onComplete(ar -> {
             if (ar.failed()) {
                 logger.warn("Execution of {} failed", this);
             } else {
@@ -64,6 +64,15 @@ public enum ApiOperation implements Handler<RoutingContext> {
             }
         });
 
+    }
+
+    private <T> Handler<T> respond(RoutingContext rc) {
+        return value -> {
+            rc.response()
+                .setStatusCode(200)
+                .putHeader("content-type", "application/json")
+                .end(Json.stringify(value, true));
+        };
     }
 
     public SecurityScheme getSecurityScheme() {
@@ -75,12 +84,12 @@ public enum ApiOperation implements Handler<RoutingContext> {
     }
 
 
-    private UserData userRecord(RequestParameters params) {
-        return Json.parse(params.body().getJsonObject(), UserData.class);
+    private User userRecord(RequestParameters params) {
+        return Json.parse(params.body().getJsonObject(), User.class);
     }
 
-    private List<UserData> userRecordList(RequestParameters params) {
-        return Json.parse(params.body().getJsonArray(), UserData[].class);
+    private List<User> userRecordList(RequestParameters params) {
+        return Json.parse(params.body().getJsonArray(), User[].class);
     }
 
     private String usernameFromPath(RequestParameters params) {

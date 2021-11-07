@@ -1,5 +1,6 @@
 package net.keksipurkki.petstore.http;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.vertx.core.*;
 import io.vertx.core.http.HttpServer;
 import io.vertx.ext.web.Router;
@@ -46,7 +47,7 @@ public class HttpVerticle extends AbstractVerticle {
         logger.trace("Mounting OpenAPI routes");
 
         var api = new Api()
-            .withUsers(Users.create(vertx));
+            .withUserService(Users.create(vertx));
 
         builder.bodyHandler(Middlewares.bodyHandler());
 
@@ -90,14 +91,17 @@ public class HttpVerticle extends AbstractVerticle {
     public FailureHandler createFailureHandler() {
         var failureHandler = new FailureHandler();
 
+        // Default
+        failureHandler.on(ApiException.class, e -> e);
+
         // OpenAPI schema violation as per Vert.x Validation Service
         failureHandler.on(BadRequestException.class, cause -> new ApiContractException("Bad request", cause));
 
+        // JSON deserialization/serialization
+        failureHandler.on(JsonProcessingException.class, cause -> new UnexpectedApiException("Encountered invalid JSON", cause));
+
         // Authentication related problems
         failureHandler.on(SecurityException.class, cause -> new UnauthorizedException("Unauthorized", cause));
-
-        // Fallback
-        failureHandler.on(ApiException.class, e -> e);
 
         // Last resort to Internal Server Error
         failureHandler.on(Throwable.class, cause -> new UnexpectedApiException("Internal server error", cause));
