@@ -1,9 +1,9 @@
-package net.keksipurkki.petclinic.http;
+package net.keksipurkki.petstore.http;
 
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
-import net.keksipurkki.petclinic.support.VertxMDC;
+import net.keksipurkki.petstore.support.VertxMDC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

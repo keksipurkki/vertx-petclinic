@@ -1,6 +1,6 @@
-package net.keksipurkki.petclinic.http;
+package net.keksipurkki.petstore.http;
 
-import net.keksipurkki.petclinic.api.ApiException;
+import net.keksipurkki.petstore.api.ApiException;
 
 public class NotFoundException extends ApiException {
 

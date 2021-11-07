@@ -1,8 +1,8 @@
-package net.keksipurkki.petclinic.support;
+package net.keksipurkki.petstore.support;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.impl.ContextInternal;
-import net.keksipurkki.petclinic.http.Middlewares;
+import net.keksipurkki.petstore.http.Middlewares;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

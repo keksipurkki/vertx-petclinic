@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>net.keksipurkki</groupId>
-  <artifactId>petclinic</artifactId>
+  <artifactId>petstore</artifactId>
   <version>1.0-SNAPSHOT</version>
 
   <properties>
@@ -94,7 +94,7 @@
         <configuration>
           <outputFileName>api</outputFileName>
           <outputPath>${project.basedir}/src/main/resources</outputPath>
-          <resourcePackages>net.keksipurkki.petclinic.api</resourcePackages>
+          <resourcePackages>net.keksipurkki.petstore.api</resourcePackages>
           <outputFormat>YAML</outputFormat>
         </configuration>
         <executions>

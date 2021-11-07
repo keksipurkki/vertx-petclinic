@@ -1,4 +1,4 @@
-package net.keksipurkki.petclinic.support;
+package net.keksipurkki.petstore.support;
 
 import ch.qos.logback.classic.pattern.ThrowableProxyConverter;
 import ch.qos.logback.classic.spi.ILoggingEvent;

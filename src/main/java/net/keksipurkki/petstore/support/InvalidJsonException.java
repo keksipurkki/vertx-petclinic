@@ -1,8 +1,6 @@
-package net.keksipurkki.petclinic.support;
+package net.keksipurkki.petstore.support;
 
-import net.keksipurkki.petclinic.api.ApiException;
-
-import java.net.URI;
+import net.keksipurkki.petstore.api.ApiException;
 
 public class InvalidJsonException extends ApiException {
     public InvalidJsonException(String message, Throwable cause) {

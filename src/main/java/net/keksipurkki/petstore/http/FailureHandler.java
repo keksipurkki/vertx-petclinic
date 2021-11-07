@@ -1,10 +1,10 @@
-package net.keksipurkki.petclinic.http;
+package net.keksipurkki.petstore.http;
 
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
-import net.keksipurkki.petclinic.api.ApiException;
-import net.keksipurkki.petclinic.api.UnexpectedApiException;
-import net.keksipurkki.petclinic.support.Json;
+import net.keksipurkki.petstore.api.ApiException;
+import net.keksipurkki.petstore.api.UnexpectedApiException;
+import net.keksipurkki.petstore.support.Json;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,8 +1,6 @@
-package net.keksipurkki.petclinic.api;
+package net.keksipurkki.petstore.api;
 
 import io.vertx.ext.web.validation.BadRequestException;
-
-import java.net.URI;
 
 /**
  * Thrown if a request does not satisfy the OpenAPI contract

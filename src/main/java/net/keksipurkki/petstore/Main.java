@@ -1,10 +1,10 @@
-package net.keksipurkki.petclinic;
+package net.keksipurkki.petstore;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
-import net.keksipurkki.petclinic.http.HttpVerticle;
+import net.keksipurkki.petstore.http.HttpVerticle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +25,7 @@ public class Main extends AbstractVerticle {
     public void start(Promise<Void> promise) {
 
         vertx.executeBlocking(this::deployVerticles).onComplete(ar -> {
+
             if (ar.failed()) {
                 promise.fail(ar.cause());
                 logger.error("Deployment failed", ar.cause());

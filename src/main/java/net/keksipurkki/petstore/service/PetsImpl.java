@@ -1,4 +1,4 @@
-package net.keksipurkki.petclinic.service;
+package net.keksipurkki.petstore.service;
 
 import io.vertx.core.Vertx;
 

@@ -2,7 +2,7 @@
 
   <appender name="TECH" class="ch.qos.logback.core.ConsoleAppender">
     <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
-      <layout class="net.keksipurkki.petclinic.support.JsonLineLayout">
+      <layout class="net.keksipurkki.petstore.support.JsonLineLayout">
         <prettyPrint>true</prettyPrint>
       </layout>
     </encoder>

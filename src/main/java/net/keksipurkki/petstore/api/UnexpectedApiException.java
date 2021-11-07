@@ -1,6 +1,4 @@
-package net.keksipurkki.petclinic.api;
-
-import java.net.URI;
+package net.keksipurkki.petstore.api;
 
 public class UnexpectedApiException extends ApiException {
 

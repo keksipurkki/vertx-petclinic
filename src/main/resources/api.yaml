@@ -4,8 +4,7 @@ info:
   description: |2+
 
     Sample implementation of a REST API demonstrating
-    the lessons learned over the years on microservice
-    development.
+    lessons learned about microservice development.
 
     Powered by Eclipse Vert.x — https://vertx.io
 
@@ -13,3 +12,169 @@ info:
 servers:
 - url: http://localhost:8080/petclinic/v1
   variables: {}
+tags:
+- name: pet
+  description: Everything about your pets
+- name: store
+  description: Access to Petstore orders
+- name: user
+  description: Operations about user
+paths:
+  /user:
+    post:
+      tags:
+      - user
+      operationId: CREATE_USER
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FutureApiMessage'
+  /user/createWithList:
+    post:
+      tags:
+      - user
+      operationId: CREATE_USER_LIST
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/User'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FutureApiMessage'
+  /user/{username}:
+    get:
+      tags:
+      - user
+      operationId: GET_USER_BY_NAME
+      parameters:
+      - name: username
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FutureUser'
+    put:
+      tags:
+      - user
+      operationId: UPDATE_USER
+      parameters:
+      - name: username
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FutureUser'
+    delete:
+      tags:
+      - user
+      operationId: DELETE_USER
+      parameters:
+      - name: username
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FutureApiMessage'
+  /user/login:
+    get:
+      tags:
+      - user
+      operationId: LOGIN_USER
+      parameters:
+      - name: username
+        in: query
+        schema:
+          type: string
+      - name: password
+        in: query
+        schema:
+          type: string
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FutureLoginToken'
+  /user/logout:
+    get:
+      tags:
+      - user
+      operationId: LOGOUT_USER
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginToken'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FutureLoginToken'
+components:
+  schemas:
+    FutureApiMessage:
+      type: object
+      properties:
+        complete:
+          type: boolean
+    User:
+      type: object
+      properties:
+        username:
+          type: string
+    FutureUser:
+      type: object
+      properties:
+        complete:
+          type: boolean
+    FutureLoginToken:
+      type: object
+      properties:
+        complete:
+          type: boolean
+    LoginToken:
+      type: object
+      properties:
+        token:
+          type: string

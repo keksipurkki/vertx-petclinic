@@ -1,4 +1,4 @@
-package net.keksipurkki.petclinic.support;
+package net.keksipurkki.petstore.support;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;

@@ -1,4 +1,4 @@
-package net.keksipurkki.petclinic.api;
+package net.keksipurkki.petstore.api;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import io.vertx.core.json.JsonObject;
