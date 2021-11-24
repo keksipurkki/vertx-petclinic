@@ -1,4 +1,4 @@
-package net.keksipurkki.petstore.model;
+package net.keksipurkki.petstore.user;
 
 public record AccessToken(String token) {
 }

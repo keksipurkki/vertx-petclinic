@@ -1,7 +1,10 @@
 package it;
 
+import io.restassured.RestAssured;
+import io.restassured.specification.RequestSpecification;
 import io.vertx.core.Future;
 import lombok.SneakyThrows;
+import net.keksipurkki.petstore.security.JwtPrincipal;
 import org.junit.jupiter.api.Assertions;
 
 import java.net.ServerSocket;

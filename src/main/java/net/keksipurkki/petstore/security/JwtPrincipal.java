@@ -1,6 +1,5 @@
 package net.keksipurkki.petstore.security;
 
-import com.fasterxml.jackson.annotation.JsonValue;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -9,8 +8,6 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import io.vertx.core.json.JsonObject;
-import net.keksipurkki.petstore.api.UnexpectedApiException;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
@@ -70,19 +67,18 @@ public class JwtPrincipal implements Principal {
             var signer = new MACSigner(SECRET);
             var header = new JWSHeader(JWSAlgorithm.HS256);
 
-            var claimsSet = new JWTClaimsSet.Builder()
+            var claims = new JWTClaimsSet.Builder()
                 .subject(subject)
-                .issuer("https://keksipurkki.net")
                 .expirationTime(new Date(new Date().getTime() + SESSION_TTL))
                 .build();
 
-            var jwt = new SignedJWT(header, claimsSet);
+            var jwt = new SignedJWT(header, claims);
             jwt.sign(signer);
 
             return new JwtPrincipal(jwt.serialize());
 
         } catch (Exception cause) {
-            throw new UnexpectedApiException("Login token computation failed", cause);
+            throw new IllegalStateException("Login token computation failed", cause);
         }
     }
 

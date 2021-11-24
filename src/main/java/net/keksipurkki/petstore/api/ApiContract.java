@@ -9,11 +9,15 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.servers.Server;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.vertx.core.Future;
-import net.keksipurkki.petstore.model.AccessToken;
-import net.keksipurkki.petstore.model.User;
+import net.keksipurkki.petstore.store.Inventory;
+import net.keksipurkki.petstore.store.NewOrder;
+import net.keksipurkki.petstore.store.Order;
+import net.keksipurkki.petstore.user.AccessToken;
+import net.keksipurkki.petstore.user.User;
 
 import javax.ws.rs.*;
 import java.util.List;
+import java.util.Map;
 
 @OpenAPIDefinition(
     info = @Info(
@@ -22,7 +26,7 @@ import java.util.List;
         description = """
                         
             Sample implementation of a REST API demonstrating
-            lessons learned about microservice development.
+            lessons learned about backend development.
                         
             Powered by Eclipse Vert.x — https://vertx.io
                         
@@ -106,5 +110,43 @@ public interface ApiContract {
         security = {@SecurityRequirement(name = "LOGIN_SESSION")}
     )
     Future<ApiMessage> logout();
+
+    /* Store */
+
+    @Path("/store/inventory")
+    @GET
+    @Operation(
+        operationId = "GET_INVENTORY",
+        tags = {"store"},
+        security = {@SecurityRequirement(name = "NONE")}
+    )
+    Future<Map<Inventory, Integer>> getInventory();
+
+    @Path("/store/order")
+    @POST
+    @Operation(
+        operationId = "PLACE_ORDER",
+        tags = {"store"},
+        security = {@SecurityRequirement(name = "LOGIN_SESSION")}
+    )
+    Future<Order> placeOrder(NewOrder order);
+
+    @Path("/store/order/{orderId}")
+    @GET
+    @Operation(
+        operationId = "GET_ORDER",
+        tags = {"store"},
+        security = {@SecurityRequirement(name = "LOGIN_SESSION")}
+    )
+    Future<Order> getOrderById(@PathParam("orderId") int orderId);
+
+    @Path("/store/order/{orderId}")
+    @DELETE
+    @Operation(
+        operationId = "DELETE_ORDER",
+        tags = {"store"},
+        security = {@SecurityRequirement(name = "LOGIN_SESSION")}
+    )
+    Future<Order> deleteOrder(@PathParam("orderId") int orderId);
 
 }

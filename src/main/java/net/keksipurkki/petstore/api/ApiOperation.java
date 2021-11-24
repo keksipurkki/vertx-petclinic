@@ -4,10 +4,12 @@ import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.validation.RequestParameters;
 import io.vertx.ext.web.validation.ValidationHandler;
-import net.keksipurkki.petstore.model.User;
 import net.keksipurkki.petstore.security.SecurityContext;
 import net.keksipurkki.petstore.security.SecurityScheme;
+import net.keksipurkki.petstore.store.NewOrder;
+import net.keksipurkki.petstore.store.Order;
 import net.keksipurkki.petstore.support.Json;
+import net.keksipurkki.petstore.user.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +29,11 @@ public enum ApiOperation implements Handler<RoutingContext> {
     DELETE_USER,
     LOGIN_USER,
     LOGOUT_USER,
-    ;
+
+    GET_INVENTORY,
+    PLACE_ORDER,
+    GET_ORDER,
+    DELETE_ORDER;
 
     private final static Logger logger = LoggerFactory.getLogger(ApiOperation.class);
     private Api prototype;
@@ -54,6 +60,10 @@ public enum ApiOperation implements Handler<RoutingContext> {
             case DELETE_USER -> api.deleteUser(usernameFromPath(params));
             case LOGIN_USER -> api.login(queryParameter(params, "username"), queryParameter(params, "password"));
             case LOGOUT_USER -> api.logout();
+            case GET_INVENTORY -> api.getInventory();
+            case PLACE_ORDER -> api.placeOrder(newOrderRecord(params));
+            case GET_ORDER -> api.getOrderById(0);
+            case DELETE_ORDER -> api.deleteOrder(0);
         };
 
         operation.onSuccess(respond(rc)).onFailure(rc::fail).onComplete(ar -> {
@@ -64,6 +74,10 @@ public enum ApiOperation implements Handler<RoutingContext> {
             }
         });
 
+    }
+
+    private NewOrder newOrderRecord(RequestParameters params) {
+        return Json.parse(params.body().getJsonObject(), NewOrder.class);
     }
 
     private <T> Handler<T> respond(RoutingContext rc) {
@@ -77,12 +91,17 @@ public enum ApiOperation implements Handler<RoutingContext> {
 
     public SecurityScheme getSecurityScheme() {
         return switch (this) {
+
+            // User operations
             case CREATE_USER, CREATE_USER_LIST, GET_USER_BY_NAME -> SecurityScheme.NONE;
             case LOGIN_USER, LOGOUT_USER -> SecurityScheme.NONE;
             case UPDATE_USER, DELETE_USER -> SecurityScheme.LOGIN_SESSION;
+
+            // Store operations
+            case GET_INVENTORY -> SecurityScheme.NONE;
+            case PLACE_ORDER, GET_ORDER, DELETE_ORDER -> SecurityScheme.LOGIN_SESSION;
         };
     }
-
 
     private User userRecord(RequestParameters params) {
         return Json.parse(params.body().getJsonObject(), User.class);

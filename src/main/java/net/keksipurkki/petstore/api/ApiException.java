@@ -2,7 +2,7 @@ package net.keksipurkki.petstore.api;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import io.vertx.core.json.JsonObject;
-import net.keksipurkki.petstore.support.CustomJsonSerialization;
+import net.keksipurkki.petstore.support.JsonSerialization;
 
 import java.net.URI;
 
@@ -13,7 +13,7 @@ import java.net.URI;
  *
  * @see "https://datatracker.ietf.org/doc/html/rfc7807"
  */
-public abstract class ApiException extends RuntimeException implements CustomJsonSerialization {
+public abstract class ApiException extends RuntimeException implements JsonSerialization {
 
     public static final String MEDIA_TYPE = "application/problem+json";
     public static final URI DEFAULT_TYPE = URI.create("about:blank");

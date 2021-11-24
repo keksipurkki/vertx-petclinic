@@ -4,6 +4,10 @@ import net.keksipurkki.petstore.api.ApiException;
 
 public class NotFoundException extends ApiException {
 
+    public NotFoundException() {
+        super("Not Found");
+    }
+
     public NotFoundException(String message) {
         super(message);
     }
@@ -15,6 +19,6 @@ public class NotFoundException extends ApiException {
 
     @Override
     public String getDetail() {
-        return "Not route handler for " + getInstance();
+        return getMessage();
     }
 }

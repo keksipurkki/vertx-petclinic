@@ -1,8 +1,7 @@
-package net.keksipurkki.petstore.service;
+package net.keksipurkki.petstore.user;
 
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
-import net.keksipurkki.petstore.model.User;
 
 import java.util.List;
 import java.util.Optional;

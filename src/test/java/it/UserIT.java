@@ -7,9 +7,9 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import net.keksipurkki.petstore.api.ApiMessage;
 import net.keksipurkki.petstore.http.HttpVerticle;
-import net.keksipurkki.petstore.model.User;
-import net.keksipurkki.petstore.service.UsersImpl;
+import net.keksipurkki.petstore.user.User;
 import net.keksipurkki.petstore.support.Json;
+import net.keksipurkki.petstore.user.UsersImpl;
 import org.junit.jupiter.api.*;
 
 import java.util.List;

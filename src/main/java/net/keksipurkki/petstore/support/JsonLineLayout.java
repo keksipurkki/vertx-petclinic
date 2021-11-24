@@ -41,7 +41,7 @@ public class JsonLineLayout extends LayoutBase<ILoggingEvent> {
     }
 
     @Data
-    private static class JsonLine implements CustomJsonSerialization {
+    private static class JsonLine implements JsonSerialization {
 
         private final JsonObject json = new JsonObject();
 

@@ -1,4 +1,4 @@
-package net.keksipurkki.petstore.model;
+package net.keksipurkki.petstore.user;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 

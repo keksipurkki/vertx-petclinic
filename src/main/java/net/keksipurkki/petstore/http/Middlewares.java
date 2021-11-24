@@ -5,6 +5,7 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import net.keksipurkki.petstore.api.ApiOperation;
 import net.keksipurkki.petstore.security.AuthenticationHandler;
+import net.keksipurkki.petstore.security.SecurityScheme;
 import net.keksipurkki.petstore.support.VertxMDC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +31,7 @@ public final class Middlewares {
 
     public static Handler<RoutingContext> routeNotFound() {
         return rc -> {
-            rc.fail(new NotFoundException("Not Found"));
+            rc.fail(new NotFoundException());
         };
     }
 
@@ -82,6 +83,12 @@ public final class Middlewares {
 
     public static Handler<RoutingContext> jwtVerification(ApiOperation operation) {
         logger.trace("Mounting authentication handler for {}", operation);
-        return AuthenticationHandler.create(operation);
+        if (operation.getSecurityScheme().equals(SecurityScheme.NONE)) {
+            logger.trace("Operation {} will be executed in anonymous context", operation);
+            return RoutingContext::next;
+        } else {
+            logger.trace("Operation {} will be executed in authenticated context", operation);
+            return AuthenticationHandler.create();
+        }
     }
 }

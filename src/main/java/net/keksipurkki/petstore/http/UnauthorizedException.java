@@ -19,6 +19,6 @@ public class UnauthorizedException extends ApiException {
 
     @Override
     public String getDetail() {
-        return getMessage(); // Do not yield details
+        return "Unauthorized"; // Do not reveal any details
     }
 }

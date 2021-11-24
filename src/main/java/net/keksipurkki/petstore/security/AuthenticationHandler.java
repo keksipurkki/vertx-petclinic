@@ -2,7 +2,6 @@ package net.keksipurkki.petstore.security;
 
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
-import net.keksipurkki.petstore.api.ApiOperation;
 
 import static java.util.Objects.isNull;
 
@@ -41,13 +40,8 @@ public final class AuthenticationHandler implements Handler<RoutingContext> {
 
     }
 
-    public static Handler<RoutingContext> create(ApiOperation operation) {
-
-        if (operation.getSecurityScheme().equals(SecurityScheme.NONE)) {
-            return RoutingContext::next;
-        } else {
-            return new AuthenticationHandler();
-        }
+    public static Handler<RoutingContext> create() {
+        return new AuthenticationHandler();
     }
 
 }

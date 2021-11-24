@@ -3,10 +3,13 @@ package net.keksipurkki.petstore.support;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import lombok.SneakyThrows;
+import net.keksipurkki.petstore.api.UnexpectedApiException;
 
 import java.util.List;
 import java.util.Map;
@@ -18,19 +21,29 @@ public final class Json {
     private static final ObjectMapper om;
 
     static {
+
         om = new ObjectMapper();
+        om.registerModule(new JavaTimeModule());
+
         om.setSerializationInclusion(JsonInclude.Include.NON_NULL); // JavaScript undefined semantics
-        om.addMixIn(JsonObject.class, JsonObjectMixin.class)
-            .addMixIn(JsonArray.class, JsonArrayMixin.class);
-        // .. Apply object mapper configuration
+
+        om.addMixIn(JsonObject.class, JsonObjectMixin.class);
+        om.addMixIn(JsonArray.class, JsonArrayMixin.class);
+
+        // Apply object mapper configuration...
+        om.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        om.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
     }
 
-    @SneakyThrows
     public static <T> String stringify(T input, boolean prettyPrint) {
-        if (prettyPrint) {
-            return om.writerWithDefaultPrettyPrinter().writeValueAsString(input);
-        } else {
-            return om.writeValueAsString(input);
+        try {
+            if (prettyPrint) {
+                return om.writerWithDefaultPrettyPrinter().writeValueAsString(input);
+            } else {
+                return om.writeValueAsString(input);
+            }
+        } catch (JsonProcessingException cause) {
+            throw new UnexpectedApiException("JSON serialization failed", cause);
         }
     }
 
