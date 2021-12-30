@@ -9,19 +9,20 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.servers.Server;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.vertx.core.Future;
+import jakarta.validation.constraints.Min;
+import jakarta.ws.rs.*;
 import net.keksipurkki.petstore.store.Inventory;
 import net.keksipurkki.petstore.store.NewOrder;
 import net.keksipurkki.petstore.store.Order;
 import net.keksipurkki.petstore.user.AccessToken;
 import net.keksipurkki.petstore.user.User;
 
-import javax.ws.rs.*;
 import java.util.List;
 import java.util.Map;
 
 @OpenAPIDefinition(
     info = @Info(
-        title = "Keksipurkki Pet Clinic",
+        title = "Keksipurkki Pet Store",
         version = "1.0.0",
         description = """
                         
@@ -138,7 +139,7 @@ public interface ApiContract {
         tags = {"store"},
         security = {@SecurityRequirement(name = "LOGIN_SESSION")}
     )
-    Future<Order> getOrderById(@PathParam("orderId") int orderId);
+    Future<Order> getOrderById(@Min(0) @PathParam("orderId") int orderId);
 
     @Path("/store/order/{orderId}")
     @DELETE
@@ -147,6 +148,6 @@ public interface ApiContract {
         tags = {"store"},
         security = {@SecurityRequirement(name = "LOGIN_SESSION")}
     )
-    Future<Order> deleteOrder(@PathParam("orderId") int orderId);
+    Future<Order> deleteOrder(@Min(0) @PathParam("orderId") int orderId);
 
 }

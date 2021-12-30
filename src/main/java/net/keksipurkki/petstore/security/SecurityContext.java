@@ -2,7 +2,7 @@ package net.keksipurkki.petstore.security;
 
 import java.security.Principal;
 
-public final class SecurityContext implements javax.ws.rs.core.SecurityContext {
+public final class SecurityContext implements jakarta.ws.rs.core.SecurityContext {
 
     public static String REQUEST_CONTEXT_KEY = SecurityContext.class + "_CONTEXT";
 

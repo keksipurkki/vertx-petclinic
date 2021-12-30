@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  title: Keksipurkki Pet Clinic
+  title: Keksipurkki Pet Store
   description: |2+
 
     Sample implementation of a REST API demonstrating
@@ -70,6 +70,7 @@ paths:
         in: path
         required: true
         schema:
+          minimum: 0
           type: integer
           format: int32
       responses:
@@ -90,6 +91,7 @@ paths:
         in: path
         required: true
         schema:
+          minimum: 0
           type: integer
           format: int32
       responses:
@@ -273,6 +275,9 @@ components:
     Order:
       type: object
       properties:
+        orderId:
+          type: integer
+          format: int32
         petId:
           type: integer
           format: int32
@@ -296,6 +301,7 @@ components:
           type: integer
           format: int32
         quantity:
+          minimum: 1
           type: integer
           format: int32
   securitySchemes:

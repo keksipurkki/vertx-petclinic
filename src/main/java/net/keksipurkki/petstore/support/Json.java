@@ -9,16 +9,21 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
 import net.keksipurkki.petstore.api.UnexpectedApiException;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public final class Json {
     private Json() {
     }
 
     private static final ObjectMapper om;
+    private static final Validator validator;
 
     static {
 
@@ -33,6 +38,8 @@ public final class Json {
         // Apply object mapper configuration...
         om.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         om.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+
+        validator = Validation.buildDefaultValidatorFactory().getValidator();
     }
 
     public static <T> String stringify(T input, boolean prettyPrint) {
@@ -51,9 +58,19 @@ public final class Json {
         return stringify(input, false);
     }
 
-    // TODO: Apply bean validation
     public static <T> T parse(JsonObject json, Class<T> target) {
-        return om.convertValue(json, target);
+        var result = om.convertValue(json, target);
+        return validate(result, target);
+    }
+
+    private static <T> T validate(T input, Class<T> target) {
+        Set<ConstraintViolation<Object>> violations = validator.validate(input);
+        if (violations.isEmpty()) {
+            return input;
+        } else {
+            var msg = String.format("JSON is not a valid representation of %s", target.getSimpleName());
+            throw new InvalidJsonException(msg, violations);
+        }
     }
 
     public static <T> List<T> parse(JsonArray array, Class<T[]> target) {

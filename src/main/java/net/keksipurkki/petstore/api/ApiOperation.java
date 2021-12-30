@@ -62,8 +62,8 @@ public enum ApiOperation implements Handler<RoutingContext> {
             case LOGOUT_USER -> api.logout();
             case GET_INVENTORY -> api.getInventory();
             case PLACE_ORDER -> api.placeOrder(newOrderRecord(params));
-            case GET_ORDER -> api.getOrderById(0);
-            case DELETE_ORDER -> api.deleteOrder(0);
+            case GET_ORDER -> api.getOrderById(orderId(params));
+            case DELETE_ORDER -> api.deleteOrder(orderId(params));
         };
 
         operation.onSuccess(respond(rc)).onFailure(rc::fail).onComplete(ar -> {
@@ -74,6 +74,10 @@ public enum ApiOperation implements Handler<RoutingContext> {
             }
         });
 
+    }
+
+    private int orderId(RequestParameters params) {
+        return params.pathParameter("orderId").getInteger();
     }
 
     private NewOrder newOrderRecord(RequestParameters params) {

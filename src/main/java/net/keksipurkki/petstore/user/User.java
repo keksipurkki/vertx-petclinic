@@ -1,8 +1,8 @@
 package net.keksipurkki.petstore.user;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 
-import javax.validation.constraints.NotNull;
 import java.security.MessageDigest;
 
 import static java.nio.charset.StandardCharsets.UTF_8;

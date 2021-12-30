@@ -11,8 +11,10 @@ public interface Orders {
     Future<Map<Inventory, Integer>> getInventory();
     Future<Order> place(NewOrder newOrder);
     Future<Optional<Order>> getById(int orderId);
+    Future<Optional<Order>> delete(int orderId);
 
     static Orders create(Vertx vertx) {
         return new OrdersImpl(vertx);
     }
+
 }

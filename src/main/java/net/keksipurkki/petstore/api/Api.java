@@ -27,6 +27,8 @@ public class Api implements ApiContract {
     private SecurityContext context;
     private Orders orders;
 
+    // User
+
     @Override
     public Future<ApiMessage> createUser(User data) {
         return users.create(data).map(v -> {
@@ -55,8 +57,8 @@ public class Api implements ApiContract {
     @Override
     public Future<User> getUserByName(String username) {
         return users.findByUsername(username)
-            .map(opt -> opt.orElseThrow(() -> new NotFoundException("User " + username + " does not exist")))
-            .map(User::redactCredentials);
+                    .map(opt -> opt.orElseThrow(() -> new NotFoundException("User " + username + " does not exist")))
+                    .map(User::redactCredentials);
     }
 
     @Override
@@ -79,22 +81,24 @@ public class Api implements ApiContract {
     @Override
     public Future<AccessToken> login(String username, String password) {
         return this.users.findByUsername(username)
-            .map(opt -> opt.orElseThrow(() -> new NotFoundException("User " + username + " does not exist")))
-            .map(user -> {
+                         .map(opt -> opt.orElseThrow(() -> new NotFoundException("User " + username + " does not exist")))
+                         .map(user -> {
 
-                if (!user.verifyPassword(password)) {
-                    throw new ForbiddenException("Invalid password");
-                }
+                             if (!user.verifyPassword(password)) {
+                                 throw new ForbiddenException("Invalid password");
+                             }
 
-                return JwtPrincipal.from(user.username());
+                             return JwtPrincipal.from(user.username());
 
-            }).map(principal -> new AccessToken(principal.getToken()));
+                         }).map(principal -> new AccessToken(principal.getToken()));
     }
 
     @Override
     public Future<ApiMessage> logout() {
         throw new NotImplementedException();
     }
+
+    // Store
 
     @Override
     public Future<Map<Inventory, Integer>> getInventory() {
@@ -109,12 +113,13 @@ public class Api implements ApiContract {
     @Override
     public Future<Order> getOrderById(int orderId) {
         return orders.getById(orderId)
-            .map(opt -> opt.orElseThrow(() -> new NotFoundException("Order " + orderId + " does not exist")));
+                     .map(opt -> opt.orElseThrow(() -> new NotFoundException("Order " + orderId + " does not exist")));
     }
 
     @Override
     public Future<Order> deleteOrder(int orderId) {
-        throw new NotImplementedException();
+        return orders.delete(orderId)
+                     .map(opt -> opt.orElseThrow(() -> new NotFoundException("Order " + orderId + " does not exist")));
     }
 
     public Api withUsers(Users users) {
