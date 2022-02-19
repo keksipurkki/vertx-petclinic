@@ -20,6 +20,26 @@ tags:
 - name: user
   description: Operations about user
 paths:
+  /pet:
+    post:
+      tags:
+      - pet
+      description: Add a new pet to the store
+      operationId: ADD_PET
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewPet'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
+      security:
+      - LOGIN_SESSION: []
   /user:
     post:
       tags:
@@ -101,6 +121,78 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Order'
+      security:
+      - LOGIN_SESSION: []
+  /pet/{petId}:
+    get:
+      tags:
+      - pet
+      description: Returns a single pet
+      operationId: GET_PET
+      parameters:
+      - name: petId
+        in: path
+        required: true
+        schema:
+          minimum: 0
+          type: integer
+          format: int32
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
+      security:
+      - NONE: []
+    post:
+      tags:
+      - pet
+      description: Update an existing pet
+      operationId: UPDATE_PET
+      parameters:
+      - name: petId
+        in: path
+        required: true
+        schema:
+          minimum: 0
+          type: integer
+          format: int32
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pet'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
+      security:
+      - LOGIN_SESSION: []
+    delete:
+      tags:
+      - pet
+      description: Deletes a pet
+      operationId: DELETE_PET
+      parameters:
+      - name: petId
+        in: path
+        required: true
+        schema:
+          minimum: 0
+          type: integer
+          format: int32
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
       security:
       - LOGIN_SESSION: []
   /user/{username}:
@@ -239,8 +331,74 @@ paths:
                 $ref: '#/components/schemas/Order'
       security:
       - LOGIN_SESSION: []
+  /pet/{petId}/uploadImage:
+    post:
+      tags:
+      - pet
+      description: uploads an image
+      operationId: UPLOAD_IMAGE
+      parameters:
+      - name: petId
+        in: path
+        required: true
+        schema:
+          minimum: 0
+          type: integer
+          format: int32
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
+      security:
+      - LOGIN_SESSION: []
 components:
   schemas:
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+    Pet:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        category:
+          $ref: '#/components/schemas/Category'
+        name:
+          type: string
+        photoUrls:
+          type: array
+          items:
+            type: string
+            format: uri
+        tags:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum:
+          - AVAILABLE
+          - PENDING
+          - SOLD
+    NewPet:
+      required:
+      - category
+      - name
+      type: object
+      properties:
+        name:
+          type: string
+        category:
+          type: string
     ApiMessage:
       type: object
       properties:

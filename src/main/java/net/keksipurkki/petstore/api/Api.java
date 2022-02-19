@@ -1,12 +1,16 @@
 package net.keksipurkki.petstore.api;
 
 import io.vertx.core.Future;
+import net.keksipurkki.petstore.http.BadRequestException;
 import net.keksipurkki.petstore.http.ForbiddenException;
 import net.keksipurkki.petstore.http.NotFoundException;
 import net.keksipurkki.petstore.http.NotImplementedException;
+import net.keksipurkki.petstore.pet.NewPet;
+import net.keksipurkki.petstore.pet.Pet;
+import net.keksipurkki.petstore.pet.Pets;
+import net.keksipurkki.petstore.pet.Status;
 import net.keksipurkki.petstore.security.JwtPrincipal;
 import net.keksipurkki.petstore.security.SecurityContext;
-import net.keksipurkki.petstore.store.Inventory;
 import net.keksipurkki.petstore.store.NewOrder;
 import net.keksipurkki.petstore.store.Order;
 import net.keksipurkki.petstore.store.Orders;
@@ -26,6 +30,7 @@ public class Api implements ApiContract {
     private Users users;
     private SecurityContext context;
     private Orders orders;
+    private Pets pets;
 
     // User
 
@@ -101,13 +106,23 @@ public class Api implements ApiContract {
     // Store
 
     @Override
-    public Future<Map<Inventory, Integer>> getInventory() {
+    public Future<Map<Status, Integer>> getInventory() {
         return orders.getInventory();
     }
 
     @Override
     public Future<Order> placeOrder(NewOrder newOrder) {
-        return orders.place(newOrder);
+        return pets.getById(newOrder.petId()).flatMap(pet -> {
+            if (pet.isEmpty()) {
+                throw new BadRequestException("Invalid pet id");
+            }
+
+            if (!pet.get().status().equals(Status.AVAILABLE)) {
+                throw new BadRequestException("Pet " + newOrder.petId() + " is not available");
+            }
+
+            return orders.place(newOrder);
+        });
     }
 
     @Override
@@ -122,6 +137,33 @@ public class Api implements ApiContract {
                      .map(opt -> opt.orElseThrow(() -> new NotFoundException("Order " + orderId + " does not exist")));
     }
 
+    @Override
+    public Future<Pet> addPet(NewPet pet) {
+        return pets.add(pet);
+    }
+
+    @Override
+    public Future<Pet> updatePet(int petId, Pet pet) {
+        return null;
+    }
+
+    @Override
+    public Future<Pet> getPetById(int petId) {
+        return pets.getById(petId)
+                   .map(opt -> opt.orElseThrow(() -> new NotFoundException("Pet " + petId + " does not exist")));
+    }
+
+    @Override
+    public Future<Pet> deletePet(int petId) {
+        return pets.delete(petId)
+                   .map(opt -> opt.orElseThrow(() -> new NotFoundException("Pet " + petId + " does not exist")));
+    }
+
+    @Override
+    public Future<ApiMessage> uploadFile(int petId) {
+        throw new NotImplementedException();
+    }
+
     public Api withUsers(Users users) {
         var clone = new Api();
         clone.users = requireNonNull(users, "Users service must be defined");
@@ -134,6 +176,16 @@ public class Api implements ApiContract {
         var clone = new Api();
         clone.orders = requireNonNull(orders, "Orders service must be defined");
         clone.users = users;
+        clone.pets = pets;
+        clone.context = context;
+        return clone;
+    }
+
+    public Api withPets(Pets pets) {
+        var clone = new Api();
+        clone.pets = requireNonNull(pets, "Pets service must be defined");
+        clone.orders = orders;
+        clone.users = users;
         clone.context = context;
         return clone;
     }
@@ -141,6 +193,7 @@ public class Api implements ApiContract {
     public Api withSecurityContext(SecurityContext context) {
         var clone = new Api();
         clone.users = users;
+        clone.pets = pets;
         clone.orders = orders;
         clone.context = context;
         return clone;

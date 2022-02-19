@@ -4,10 +4,11 @@ import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.validation.RequestParameters;
 import io.vertx.ext.web.validation.ValidationHandler;
+import net.keksipurkki.petstore.pet.NewPet;
+import net.keksipurkki.petstore.pet.Pet;
 import net.keksipurkki.petstore.security.SecurityContext;
 import net.keksipurkki.petstore.security.SecurityScheme;
 import net.keksipurkki.petstore.store.NewOrder;
-import net.keksipurkki.petstore.store.Order;
 import net.keksipurkki.petstore.support.Json;
 import net.keksipurkki.petstore.user.User;
 import org.slf4j.Logger;
@@ -33,7 +34,13 @@ public enum ApiOperation implements Handler<RoutingContext> {
     GET_INVENTORY,
     PLACE_ORDER,
     GET_ORDER,
-    DELETE_ORDER;
+    DELETE_ORDER,
+
+    ADD_PET,
+    GET_PET,
+    UPDATE_PET,
+    UPLOAD_IMAGE,
+    DELETE_PET;
 
     private final static Logger logger = LoggerFactory.getLogger(ApiOperation.class);
     private Api prototype;
@@ -55,15 +62,20 @@ public enum ApiOperation implements Handler<RoutingContext> {
         var operation = switch (this) {
             case CREATE_USER -> api.createUser(userRecord(params));
             case CREATE_USER_LIST -> api.createWithList(userRecordList(params));
-            case GET_USER_BY_NAME -> api.getUserByName(usernameFromPath(params));
-            case UPDATE_USER -> api.updateUser(usernameFromPath(params), userRecord(params));
-            case DELETE_USER -> api.deleteUser(usernameFromPath(params));
+            case GET_USER_BY_NAME -> api.getUserByName(username(params));
+            case UPDATE_USER -> api.updateUser(username(params), userRecord(params));
+            case DELETE_USER -> api.deleteUser(username(params));
             case LOGIN_USER -> api.login(queryParameter(params, "username"), queryParameter(params, "password"));
             case LOGOUT_USER -> api.logout();
             case GET_INVENTORY -> api.getInventory();
             case PLACE_ORDER -> api.placeOrder(newOrderRecord(params));
             case GET_ORDER -> api.getOrderById(orderId(params));
             case DELETE_ORDER -> api.deleteOrder(orderId(params));
+            case ADD_PET -> api.addPet(newPetRecord(params));
+            case GET_PET -> api.getPetById(petId(params));
+            case UPDATE_PET -> api.updatePet(petId(params), pet(params));
+            case UPLOAD_IMAGE -> api.uploadFile(petId(params));
+            case DELETE_PET -> api.deletePet(petId(params));
         };
 
         operation.onSuccess(respond(rc)).onFailure(rc::fail).onComplete(ar -> {
@@ -74,6 +86,18 @@ public enum ApiOperation implements Handler<RoutingContext> {
             }
         });
 
+    }
+
+    private Pet pet(RequestParameters params) {
+        return Json.parse(params.body().getJsonObject(), Pet.class);
+    }
+
+    private int petId(RequestParameters params) {
+        return params.pathParameter("petId").getInteger();
+    }
+
+    private NewPet newPetRecord(RequestParameters params) {
+        return Json.parse(params.body().getJsonObject(), NewPet.class);
     }
 
     private int orderId(RequestParameters params) {
@@ -87,9 +111,9 @@ public enum ApiOperation implements Handler<RoutingContext> {
     private <T> Handler<T> respond(RoutingContext rc) {
         return value -> {
             rc.response()
-                .setStatusCode(200)
-                .putHeader("content-type", "application/json")
-                .end(Json.stringify(value, true));
+              .setStatusCode(200)
+              .putHeader("content-type", "application/json")
+              .end(Json.stringify(value, true));
         };
     }
 
@@ -104,6 +128,10 @@ public enum ApiOperation implements Handler<RoutingContext> {
             // Store operations
             case GET_INVENTORY -> SecurityScheme.NONE;
             case PLACE_ORDER, GET_ORDER, DELETE_ORDER -> SecurityScheme.LOGIN_SESSION;
+
+            // Pet operations
+            case GET_PET -> SecurityScheme.NONE;
+            case ADD_PET, DELETE_PET, UPDATE_PET, UPLOAD_IMAGE -> SecurityScheme.LOGIN_SESSION;
         };
     }
 
@@ -115,7 +143,7 @@ public enum ApiOperation implements Handler<RoutingContext> {
         return Json.parse(params.body().getJsonArray(), User[].class);
     }
 
-    private String usernameFromPath(RequestParameters params) {
+    private String username(RequestParameters params) {
         return params.pathParameter("username").getString();
     }
 

@@ -70,7 +70,7 @@ public final class Middlewares {
             VertxMDC.put("microservice", environment.getOrDefault(APP_NAME, FALLBACK));
             VertxMDC.put("taskId", environment.getOrDefault(APP_TASK_ID, FALLBACK));
 
-            logger.debug("Request tracing enabled");
+            logger.trace("Request tracing enabled");
 
             if (warn) {
                 logger.warn("Encountered empty values for correlation identifiers. The request will not be traceable across multiple service calls.");

@@ -2,6 +2,8 @@ package net.keksipurkki.petstore.store;
 
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
+import net.keksipurkki.petstore.pet.PetStore;
+import net.keksipurkki.petstore.pet.Status;
 
 import java.util.Map;
 import java.util.Optional;
@@ -16,8 +18,8 @@ public class OrdersImpl implements Orders {
     }
 
     @Override
-    public Future<Map<Inventory, Integer>> getInventory() {
-        return Future.succeededFuture(Inventory.counts());
+    public Future<Map<Status, Integer>> getInventory() {
+        return Future.succeededFuture(PetStore.counts());
     }
 
     @Override

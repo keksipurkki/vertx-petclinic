@@ -11,7 +11,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.vertx.core.Future;
 import jakarta.validation.constraints.Min;
 import jakarta.ws.rs.*;
-import net.keksipurkki.petstore.store.Inventory;
+import net.keksipurkki.petstore.pet.NewPet;
+import net.keksipurkki.petstore.pet.Pet;
+import net.keksipurkki.petstore.pet.Status;
 import net.keksipurkki.petstore.store.NewOrder;
 import net.keksipurkki.petstore.store.Order;
 import net.keksipurkki.petstore.user.AccessToken;
@@ -121,7 +123,7 @@ public interface ApiContract {
         tags = {"store"},
         security = {@SecurityRequirement(name = "NONE")}
     )
-    Future<Map<Inventory, Integer>> getInventory();
+    Future<Map<Status, Integer>> getInventory();
 
     @Path("/store/order")
     @POST
@@ -149,5 +151,62 @@ public interface ApiContract {
         security = {@SecurityRequirement(name = "LOGIN_SESSION")}
     )
     Future<Order> deleteOrder(@Min(0) @PathParam("orderId") int orderId);
+
+    /* Pet */
+
+    @Path("/pet")
+    @POST
+    @Operation(
+        operationId = "ADD_PET",
+        description = "Add a new pet to the store",
+        tags = {"pet"},
+        security = {@SecurityRequirement(name = "LOGIN_SESSION")}
+    )
+    Future<Pet> addPet(NewPet pet);
+
+    @Path("/pet/{petId}")
+    @POST
+    @Operation(
+        operationId = "UPDATE_PET",
+        description = "Update an existing pet",
+        tags = {"pet"},
+        security = {@SecurityRequirement(name = "LOGIN_SESSION")}
+    )
+    Future<Pet> updatePet(@Min(0) @PathParam("petId") int petId, Pet pet);
+
+    @Path("/pet/{petId}/uploadImage")
+    @POST
+    @Operation(
+        operationId = "UPLOAD_IMAGE",
+        description = "uploads an image",
+        tags = {"pet"},
+        security = {@SecurityRequirement(name = "LOGIN_SESSION")}
+    )
+    @Consumes("multipart/form-data")
+    @Produces("application/json")
+    Future<ApiMessage> uploadFile(@Min(0) @PathParam("petId") int petId);
+
+    @Path("/pet/{petId}")
+    @GET
+    @Operation(
+        operationId = "GET_PET",
+        description = "Returns a single pet",
+        tags = {"pet"},
+        security = {@SecurityRequirement(name = "NONE")}
+
+    )
+    Future<Pet> getPetById(@Min(0) @PathParam("petId") int petId);
+
+
+    @Path("/pet/{petId}")
+    @DELETE
+    @Operation(
+        operationId = "DELETE_PET",
+        description = "Deletes a pet",
+        tags = {"pet"},
+        security = {@SecurityRequirement(name = "LOGIN_SESSION")}
+    )
+    Future<Pet> deletePet(@Min(0) @PathParam("petId") int petId);
+
 
 }

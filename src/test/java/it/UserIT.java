@@ -1,6 +1,7 @@
 package it;
 
 import io.restassured.RestAssured;
+import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
 import io.vertx.core.Vertx;
@@ -13,6 +14,7 @@ import net.keksipurkki.petstore.user.UsersImpl;
 import org.junit.jupiter.api.*;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static it.Tests.await;
@@ -60,6 +62,11 @@ public class UserIT {
         RestAssured.port = port;
         RestAssured.basePath = HttpVerticle.CONTEXT_PATH;
         RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
+
+        RestAssured.requestSpecification = new RequestSpecBuilder()
+            .addHeader("x-request-id", UUID.randomUUID().toString())
+            .addHeader("x-session-id", UUID.randomUUID().toString())
+            .build();
     }
 
     @AfterEach

@@ -7,8 +7,9 @@ import io.restassured.filter.log.ResponseLoggingFilter;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import net.keksipurkki.petstore.http.HttpVerticle;
+import net.keksipurkki.petstore.pet.PetStore;
 import net.keksipurkki.petstore.security.JwtPrincipal;
-import net.keksipurkki.petstore.store.Inventory;
+import net.keksipurkki.petstore.pet.Status;
 import net.keksipurkki.petstore.store.NewOrder;
 import net.keksipurkki.petstore.store.Order;
 import net.keksipurkki.petstore.support.Json;
@@ -256,7 +257,7 @@ public class StoreIT {
             .accept("application/json")
             .get("/store/inventory");
 
-        var expected = JsonObject.mapFrom(Inventory.counts());
+        var expected = JsonObject.mapFrom(PetStore.counts());
         var actual = new JsonObject(resp.body().asString());
 
         Assertions.assertEquals(expected, actual);
