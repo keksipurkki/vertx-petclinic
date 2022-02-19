@@ -2,7 +2,6 @@ package net.keksipurkki.petstore.pet;
 
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
-import io.vertx.core.buffer.Buffer;
 
 import java.util.Optional;
 
@@ -21,8 +20,15 @@ class PetsImpl implements Pets {
     }
 
     @Override
-    public Future<Pet> update(Pet pet, Buffer image) {
-        return null;
+    public Future<Pet> update(Pet pet, PetImage image) {
+        // Store image
+        System.out.println(image.filename());
+        System.out.println(image.contentType());
+        System.out.println(image.metadata());
+
+        // Update photoUrls
+        pet.photoUrls().add(image.toUri());
+        return Future.succeededFuture(pet);
     }
 
     @Override

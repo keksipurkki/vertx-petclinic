@@ -1,14 +1,12 @@
 package net.keksipurkki.petstore.api;
 
 import io.vertx.core.Future;
+import io.vertx.ext.web.FileUpload;
 import net.keksipurkki.petstore.http.BadRequestException;
 import net.keksipurkki.petstore.http.ForbiddenException;
 import net.keksipurkki.petstore.http.NotFoundException;
 import net.keksipurkki.petstore.http.NotImplementedException;
-import net.keksipurkki.petstore.pet.NewPet;
-import net.keksipurkki.petstore.pet.Pet;
-import net.keksipurkki.petstore.pet.Pets;
-import net.keksipurkki.petstore.pet.Status;
+import net.keksipurkki.petstore.pet.*;
 import net.keksipurkki.petstore.security.JwtPrincipal;
 import net.keksipurkki.petstore.security.SecurityContext;
 import net.keksipurkki.petstore.store.NewOrder;
@@ -20,6 +18,7 @@ import net.keksipurkki.petstore.user.User;
 import net.keksipurkki.petstore.user.UserException;
 import net.keksipurkki.petstore.user.Users;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -160,8 +159,22 @@ public class Api implements ApiContract {
     }
 
     @Override
-    public Future<ApiMessage> uploadFile(int petId) {
-        throw new NotImplementedException();
+    public Future<ApiMessage> uploadFile(int petId, FileUpload upload, String metadata) {
+        return pets.getById(petId)
+                   .map(opt -> opt.orElseThrow(() -> new NotFoundException("Pet " + petId + " does not exist")))
+                   .flatMap(pet -> pets.update(pet, petImage(upload, metadata)))
+                   .map(pet -> {
+                       var message = "Pet image was uploaded successfully";
+                       return new ApiMessage(message);
+                   });
+    }
+
+    private PetImage petImage(FileUpload upload, String metadata) {
+        try {
+            return PetImage.from(upload, metadata);
+        } catch (IOException cause) {
+            throw new UnexpectedApiException("Pet image cannot be created", cause);
+        }
     }
 
     public Api withUsers(Users users) {

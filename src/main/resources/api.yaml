@@ -345,6 +345,19 @@ paths:
           minimum: 0
           type: integer
           format: int32
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  description: file
+                  format: binary
+                additionalMetadata:
+                  type: string
+                  description: metadata
       responses:
         default:
           description: default response

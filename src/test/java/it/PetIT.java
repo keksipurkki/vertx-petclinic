@@ -1,6 +1,7 @@
 package it;
 
 import io.restassured.RestAssured;
+import io.restassured.builder.MultiPartSpecBuilder;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
@@ -74,35 +75,15 @@ public class PetIT {
 
     @Test
     public void getPetById_happyPath_ok() {
-        var id = -1;
+        var pet = pet();
+        var id = pet.id();
 
-        {
-            var resp = RestAssured
-                .given()
-                .header("content-type", "application/json")
-                .body(Json.stringify(NEW_PET, true))
-                .post("/pet");
+        var resp = RestAssured
+            .given()
+            .accept("application/json")
+            .get("/pet/{petId}", id);
 
-            Assertions.assertEquals(200, resp.statusCode());
-
-            var json = new JsonObject(resp.asString());
-            var actual = Json.parse(json, Pet.class);
-            id = actual.id();
-            Assertions.assertEquals(Status.AVAILABLE, actual.status());
-        }
-
-        {
-
-            var resp = RestAssured
-                .given()
-                .accept("application/json")
-                .get("/pet/{petId}", id);
-
-            Assertions.assertEquals(200, resp.statusCode());
-
-        }
-
-
+        Assertions.assertEquals(200, resp.statusCode());
     }
 
     @Test
@@ -123,10 +104,12 @@ public class PetIT {
     @Test
     public void getPetById_invalidId_badRequest() {
 
+        var openApiSpecViolation = -1;
+
         var resp = RestAssured
             .given()
             .accept("application/json")
-            .get("/pet/{petId}", -1);
+            .get("/pet/{petId}", openApiSpecViolation);
 
         Assertions.assertEquals(400, resp.statusCode());
 
@@ -136,12 +119,12 @@ public class PetIT {
     @DisplayName("Delete pet — invalid pet id — Bad Request")
     public void deleteOrder_invalidOrderId_badRequest() {
 
-        var petId = -1;
+        var openApiSpecViolation = -1;
 
         var resp = RestAssured
             .given()
             .accept("application/json")
-            .delete("/pet/{orderId}", petId);
+            .delete("/pet/{orderId}", openApiSpecViolation);
 
         Assertions.assertEquals(400, resp.statusCode());
 
@@ -151,23 +134,8 @@ public class PetIT {
     @DisplayName("Delete pet — retry")
     public void deleteOrder_twice_ok_then_notFound() {
 
-        var petId = -1;
-
-        {
-
-            var resp = RestAssured
-                .given()
-                .header("content-type", "application/json")
-                .body(Json.stringify(NEW_PET, true))
-                .post("/pet");
-
-            Assertions.assertEquals(200, resp.statusCode());
-
-            var json = new JsonObject(resp.asString());
-            var actual = Json.parse(json, Pet.class);
-            petId = actual.id();
-
-        }
+        var pet = pet();
+        var petId = pet.id();
 
         {
 
@@ -198,11 +166,28 @@ public class PetIT {
         var pet = pet();
         var petId = pet.id();
 
+        var fileUpload = new MultiPartSpecBuilder(dogImage())
+            .with()
+            .fileName("snoopy.png")
+            .and().with()
+            .mimeType("application/octet-stream")
+            .and().with()
+            .controlName("file")
+            .build();
+
+        var metadata = new MultiPartSpecBuilder("Some description")
+            .with()
+            .mimeType("text/plain")
+            .and().with()
+            .controlName("additionalMetadata")
+            .emptyFileName()
+            .build();
+
         var resp = RestAssured
             .given()
-            .contentType("multipart/form-data")
-            .multiPart("file", dogImage())
-            .multiPart("additionalMetadata", "snoopy.png")
+            //.contentType("multipart/form-data")
+            .multiPart(fileUpload)
+            .multiPart(metadata)
             .post("/pet/{petId}/uploadImage", petId);
 
         Assertions.assertEquals(200, resp.statusCode());

@@ -2,13 +2,17 @@ package net.keksipurkki.petstore.api;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.servers.Server;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.vertx.core.Future;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.ext.web.FileUpload;
 import jakarta.validation.constraints.Min;
 import jakarta.ws.rs.*;
 import net.keksipurkki.petstore.pet.NewPet;
@@ -184,7 +188,12 @@ public interface ApiContract {
     )
     @Consumes("multipart/form-data")
     @Produces("application/json")
-    Future<ApiMessage> uploadFile(@Min(0) @PathParam("petId") int petId);
+    Future<ApiMessage> uploadFile(@Min(0) @PathParam("petId") int petId,
+                                  @Parameter(schema = @Schema(type = "string", format = "binary", description = "file"))
+                                  @FormParam("file") FileUpload image,
+                                  @Parameter(schema = @Schema(type = "string", description = "metadata"))
+                                  @FormParam("additionalMetadata") String metadata
+    );
 
     @Path("/pet/{petId}")
     @GET

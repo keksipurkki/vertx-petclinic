@@ -26,7 +26,7 @@ public final class Middlewares {
     }
 
     public static BodyHandler bodyHandler() {
-        return BodyHandler.create();
+        return BodyHandler.create().setDeleteUploadedFilesOnEnd(true);
     }
 
     public static Handler<RoutingContext> routeNotFound() {

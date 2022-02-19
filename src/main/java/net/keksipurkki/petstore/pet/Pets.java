@@ -9,7 +9,7 @@ import java.util.Optional;
 public interface Pets {
 
     Future<Pet> add(NewPet input);
-    Future<Pet> update(Pet pet, Buffer image);
+    Future<Pet> update(Pet pet, PetImage image);
     Future<Pet> update(Pet pet);
     Future<Optional<Pet>> getById(int petId);
     Future<Optional<Pet>> delete(int petId);

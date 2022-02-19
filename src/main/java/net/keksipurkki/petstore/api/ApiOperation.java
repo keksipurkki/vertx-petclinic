@@ -1,6 +1,7 @@
 package net.keksipurkki.petstore.api;
 
 import io.vertx.core.Handler;
+import io.vertx.ext.web.FileUpload;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.validation.RequestParameters;
 import io.vertx.ext.web.validation.ValidationHandler;
@@ -15,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Set;
 
 import static java.util.Objects.nonNull;
 
@@ -74,7 +76,7 @@ public enum ApiOperation implements Handler<RoutingContext> {
             case ADD_PET -> api.addPet(newPetRecord(params));
             case GET_PET -> api.getPetById(petId(params));
             case UPDATE_PET -> api.updatePet(petId(params), pet(params));
-            case UPLOAD_IMAGE -> api.uploadFile(petId(params));
+            case UPLOAD_IMAGE -> api.uploadFile(petId(params), fileUpload(rc.fileUploads(), "file"), formData(params, "additionalMetadata"));
             case DELETE_PET -> api.deletePet(petId(params));
         };
 
@@ -86,6 +88,16 @@ public enum ApiOperation implements Handler<RoutingContext> {
             }
         });
 
+    }
+
+    private FileUpload fileUpload(Set<FileUpload> uploads, String file) {
+        return uploads.stream().filter(u -> u.name().equals(file))
+                      .findFirst()
+                      .orElseThrow(() -> new UnexpectedApiException("File not present in the request", null));
+    }
+
+    private String formData(RequestParameters params, String key) {
+        return params.body().getJsonObject().getString(key);
     }
 
     private Pet pet(RequestParameters params) {
