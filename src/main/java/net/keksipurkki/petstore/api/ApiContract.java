@@ -36,21 +36,29 @@ import java.util.Map;
             lessons learned about backend development.
                         
             Powered by Eclipse Vert.x — https://vertx.io
-                        
+                                                                         
             """
     ),
-    servers = {
-        @Server(url = "http://localhost:8080/petstore/v1")
-    },
-    tags = {
-        @Tag(name = "pet", description = "Everything about your pets"),
-        @Tag(name = "store", description = "Access to Petstore orders"),
-        @Tag(name = "user", description = "Operations about user")
-    }
+    servers = {@Server(url = "http://localhost:8080/petstore/v1")},
+    tags = {@Tag(
+        name = "pet",
+        description = "Everything about your pets"
+    ), @Tag(
+        name = "store",
+        description = "Access to Petstore orders"
+    ), @Tag(
+        name = "user",
+        description = "Operations about user"
+    )}
 )
 @Produces("application/json")
 @Consumes("application/json")
-@SecurityScheme(name = "LOGIN_SESSION", type = SecuritySchemeType.HTTP, scheme = "bearer", bearerFormat = "JWT")
+@SecurityScheme(
+    name = "LOGIN_SESSION",
+    type = SecuritySchemeType.HTTP,
+    scheme = "bearer",
+    bearerFormat = "JWT"
+)
 public interface ApiContract {
 
     /* User */
@@ -169,7 +177,7 @@ public interface ApiContract {
     Future<Pet> addPet(NewPet pet);
 
     @Path("/pet/{petId}")
-    @POST
+    @PUT
     @Operation(
         operationId = "UPDATE_PET",
         description = "Update an existing pet",
@@ -188,12 +196,18 @@ public interface ApiContract {
     )
     @Consumes("multipart/form-data")
     @Produces("application/json")
-    Future<ApiMessage> uploadFile(@Min(0) @PathParam("petId") int petId,
-                                  @Parameter(schema = @Schema(type = "string", format = "binary", description = "file"))
-                                  @FormParam("file") FileUpload image,
-                                  @Parameter(schema = @Schema(type = "string", description = "metadata"))
-                                  @FormParam("additionalMetadata") String metadata
-    );
+    Future<ApiMessage> uploadFile(@Min(0) @PathParam("petId") int petId, @Parameter(
+        schema = @Schema(
+            type = "string",
+            format = "binary",
+            description = "file"
+        )
+    ) @FormParam("file") FileUpload image, @Parameter(
+        schema = @Schema(
+            type = "string",
+            description = "metadata"
+        )
+    ) @FormParam("additionalMetadata") String metadata);
 
     @Path("/pet/{petId}")
     @GET
@@ -205,7 +219,6 @@ public interface ApiContract {
 
     )
     Future<Pet> getPetById(@Min(0) @PathParam("petId") int petId);
-
 
     @Path("/pet/{petId}")
     @DELETE

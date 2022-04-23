@@ -10,8 +10,11 @@ import java.util.Optional;
 public interface Orders {
 
     Future<Map<Status, Integer>> getInventory();
+
     Future<Order> place(NewOrder newOrder);
+
     Future<Optional<Order>> getById(int orderId);
+
     Future<Optional<Order>> delete(int orderId);
 
     static Orders create(Vertx vertx) {

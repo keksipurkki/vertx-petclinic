@@ -8,6 +8,7 @@ import io.restassured.filter.log.ResponseLoggingFilter;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import lombok.SneakyThrows;
+import net.keksipurkki.petstore.api.Api;
 import net.keksipurkki.petstore.http.HttpVerticle;
 import net.keksipurkki.petstore.pet.NewPet;
 import net.keksipurkki.petstore.pet.Pet;
@@ -25,9 +26,13 @@ import java.util.concurrent.TimeUnit;
 import static it.Tests.await;
 import static it.Tests.randomPort;
 
-@Timeout(value = 30, unit = TimeUnit.SECONDS)
+@Timeout(
+    value = 30,
+    unit = TimeUnit.SECONDS
+)
 public class PetIT {
 
+    private static final Vertx vertx = Vertx.vertx();
     private static final NewPet NEW_PET = new NewPet("doggone", "dogs");
 
     @BeforeAll
@@ -35,8 +40,11 @@ public class PetIT {
     public static void randomPort_deployServer_serverPortEquals() {
 
         var port = randomPort();
-        var vertx = Vertx.vertx();
+        var api = Api.create(vertx);
+
         var server = new HttpVerticle();
+        server.withApi(api);
+
         var token = JwtPrincipal.from("test_user").getToken();
 
         await(vertx.deployVerticle(server));
@@ -167,18 +175,13 @@ public class PetIT {
         var petId = pet.id();
 
         var fileUpload = new MultiPartSpecBuilder(dogImage())
-            .with()
             .fileName("snoopy.png")
-            .and().with()
             .mimeType("application/octet-stream")
-            .and().with()
             .controlName("file")
             .build();
 
         var metadata = new MultiPartSpecBuilder("Some description")
-            .with()
             .mimeType("text/plain")
-            .and().with()
             .controlName("additionalMetadata")
             .emptyFileName()
             .build();
@@ -191,6 +194,90 @@ public class PetIT {
             .post("/pet/{petId}/uploadImage", petId);
 
         Assertions.assertEquals(200, resp.statusCode());
+    }
+
+    @Test
+    public void updatePet_noChanges_ok() {
+        var pet = pet();
+
+        var resp = RestAssured
+            .given()
+            .contentType("application/json")
+            .body(Json.stringify(pet, true))
+            .put("/pet/{petId}", pet.id());
+
+        Assertions.assertEquals(200, resp.statusCode());
+
+        var json = new JsonObject(resp.body().asString());
+        var updated = Json.parse(json, Pet.class);
+
+        Assertions.assertEquals(updated, pet);
+
+    }
+
+    @Test
+    public void updatePet_changeName_ok() {
+        var pet = pet();
+        var old = pet.name();
+        var newName = "EXPECTED";
+
+        var json = new JsonObject(Json.stringify(pet));
+        json.put("name", newName);
+
+        var resp = RestAssured
+            .given()
+            .contentType("application/json")
+            .body(json.toString())
+            .put("/pet/{petId}", pet.id());
+
+        Assertions.assertEquals(200, resp.statusCode());
+
+        var body = new JsonObject(resp.body().asString());
+        var updated = Json.parse(body, Pet.class);
+
+        Assertions.assertNotEquals(old, newName);
+        Assertions.assertEquals(updated.name(), newName);
+
+
+    }
+
+    @Test
+    public void updatePet_putAndGet_changeIsPersisted() {
+
+        var pet = pet();
+        var newName = "EXPECTED";
+
+        {
+
+            var json = new JsonObject(Json.stringify(pet));
+            json.put("name", newName);
+
+            var resp = RestAssured
+                .given()
+                .contentType("application/json")
+                .body(json.toString())
+                .put("/pet/{petId}", pet.id());
+
+            Assertions.assertEquals(200, resp.statusCode());
+
+        }
+
+        {
+
+            var resp = RestAssured
+                .given()
+                .contentType("application/json")
+                .get("/pet/{petId}", pet.id());
+
+            Assertions.assertEquals(200, resp.statusCode());
+
+            var json = new JsonObject(resp.body().asString());
+
+            Assertions.assertEquals(newName, json.getString("name"));
+
+        }
+
+
     }
 
     @SneakyThrows

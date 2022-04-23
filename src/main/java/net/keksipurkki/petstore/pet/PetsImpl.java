@@ -33,7 +33,7 @@ class PetsImpl implements Pets {
 
     @Override
     public Future<Pet> update(Pet pet) {
-        return null;
+        return Future.succeededFuture(PetStore.update(pet));
     }
 
     @Override

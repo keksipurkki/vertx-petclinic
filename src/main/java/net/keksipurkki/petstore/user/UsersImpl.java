@@ -74,7 +74,7 @@ public final class UsersImpl implements Users {
     @Override
     public Future<Void> delete(User user) {
         return Future.succeededFuture(deletedUser(user.username()))
-            .map(v -> null);
+                     .map(v -> null);
     }
 
     @Override

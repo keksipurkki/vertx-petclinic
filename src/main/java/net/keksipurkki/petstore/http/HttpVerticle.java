@@ -13,6 +13,7 @@ import net.keksipurkki.petstore.user.Users;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
 public class HttpVerticle extends AbstractVerticle {
@@ -21,12 +22,18 @@ public class HttpVerticle extends AbstractVerticle {
     public static String DIAGNOSTICS_PATH = "/_diagnostics";
 
     private final static Logger logger = LoggerFactory.getLogger(HttpVerticle.class);
+    private Api api;
 
     private HttpServer server;
 
+    public HttpVerticle withApi(Api api) {
+        this.api = api;
+        return this;
+    }
+
     @Override
     final public void start(Promise<Void> promise) {
-        var openapi = openApiSpecification();
+        var openapi = "api.yaml";
         logger.info("Reading OpenAPI specification from {}", openapi);
 
         RouterBuilder.create(vertx, openapi)
@@ -46,11 +53,6 @@ public class HttpVerticle extends AbstractVerticle {
 
     public Router createRouter(RouterBuilder builder) {
         logger.trace("Mounting OpenAPI routes");
-
-        var api = new Api()
-            .withUsers(Users.create(vertx))
-            .withOrders(Orders.create(vertx))
-            .withPets(Pets.create(vertx));
 
         builder.bodyHandler(Middlewares.bodyHandler());
 
@@ -121,11 +123,6 @@ public class HttpVerticle extends AbstractVerticle {
         });
 
         return router;
-    }
-
-    protected String openApiSpecification() {
-        var url = HttpVerticle.class.getResource("/api.yaml");
-        return requireNonNull(url).toString();
     }
 
     private Handler<AsyncResult<HttpServer>> done(Promise<Void> promise) {

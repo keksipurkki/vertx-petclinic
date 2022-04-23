@@ -6,6 +6,7 @@ import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import net.keksipurkki.petstore.api.Api;
 import net.keksipurkki.petstore.api.ApiMessage;
 import net.keksipurkki.petstore.http.HttpVerticle;
 import net.keksipurkki.petstore.user.User;
@@ -24,7 +25,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 
-@Timeout(value = 30, unit = TimeUnit.SECONDS)
+@Timeout(
+    value = 30,
+    unit = TimeUnit.SECONDS
+)
 public class UserIT {
 
     private static final User ALICE = new User(
@@ -47,13 +51,16 @@ public class UserIT {
         null
     );
 
+    private final static Vertx vertx = Vertx.vertx();
+
     @BeforeAll
     @DisplayName("Server starts")
     public static void randomPort_deployServer_serverPortEquals() {
 
+        var api = Api.create(vertx);
         var port = randomPort();
-        var vertx = Vertx.vertx();
         var server = new HttpVerticle();
+        server.withApi(api);
 
         await(vertx.deployVerticle(server));
         await(server.listen(port));

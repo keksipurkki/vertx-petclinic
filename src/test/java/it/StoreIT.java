@@ -4,15 +4,21 @@ import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import net.keksipurkki.petstore.api.Api;
 import net.keksipurkki.petstore.http.HttpVerticle;
+import net.keksipurkki.petstore.pet.NewPet;
+import net.keksipurkki.petstore.pet.Pet;
 import net.keksipurkki.petstore.pet.PetStore;
+import net.keksipurkki.petstore.pet.Pets;
 import net.keksipurkki.petstore.security.JwtPrincipal;
-import net.keksipurkki.petstore.pet.Status;
 import net.keksipurkki.petstore.store.NewOrder;
 import net.keksipurkki.petstore.store.Order;
+import net.keksipurkki.petstore.store.Orders;
 import net.keksipurkki.petstore.support.Json;
+import net.keksipurkki.petstore.user.Users;
 import org.junit.jupiter.api.*;
 
 import java.util.UUID;
@@ -22,18 +28,24 @@ import java.util.concurrent.TimeUnit;
 import static it.Tests.await;
 import static it.Tests.randomPort;
 
-@Timeout(value = 30, unit = TimeUnit.SECONDS)
+@Timeout(
+    value = 30,
+    unit = TimeUnit.SECONDS
+)
 public class StoreIT {
 
-    private static final NewOrder NEW_ORDER = new NewOrder(0, 1);
+    private final static Vertx vertx = Vertx.vertx();
+    private static Pet snoopy;
 
     @BeforeAll
     @DisplayName("Server starts")
     public static void randomPort_deployServer_serverPortEquals() {
 
         var port = randomPort();
-        var vertx = Vertx.vertx();
+        var api = await(createApi());
         var server = new HttpVerticle();
+        server.withApi(api);
+
         var token = JwtPrincipal.from("test_user").getToken();
 
         await(vertx.deployVerticle(server));
@@ -59,7 +71,7 @@ public class StoreIT {
         var resp = RestAssured
             .given()
             .header("content-type", "application/json")
-            .body(Json.stringify(NEW_ORDER, true))
+            .body(Json.stringify(newOrder(), true))
             .post("/store/order");
 
         Assertions.assertEquals(200, resp.statusCode());
@@ -75,7 +87,7 @@ public class StoreIT {
     @DisplayName("Place a new order — invalid quantity - bad request")
     public void placeOrder_invalidQuantity_responseMatchesSpec() {
 
-        var body = JsonObject.mapFrom(NEW_ORDER).put("quantity", -1);
+        var body = JsonObject.mapFrom(newOrder()).put("quantity", -1);
 
         var resp = RestAssured
             .given()
@@ -126,7 +138,7 @@ public class StoreIT {
             var resp = RestAssured
                 .given()
                 .header("content-type", "application/json")
-                .body(Json.stringify(NEW_ORDER, true))
+                .body(Json.stringify(newOrder(), true))
                 .post("/store/order");
 
             Assertions.assertEquals(200, resp.statusCode());
@@ -192,7 +204,7 @@ public class StoreIT {
             var resp = RestAssured
                 .given()
                 .header("content-type", "application/json")
-                .body(Json.stringify(NEW_ORDER, true))
+                .body(Json.stringify(newOrder(), true))
                 .post("/store/order");
 
             Assertions.assertEquals(200, resp.statusCode());
@@ -230,7 +242,6 @@ public class StoreIT {
 
         }
 
-
     }
 
     @Test
@@ -262,6 +273,21 @@ public class StoreIT {
 
         Assertions.assertEquals(expected, actual);
 
+    }
+
+    static NewOrder newOrder() {
+        return new NewOrder(snoopy.id(), 1);
+    }
+
+    static Future<Api> createApi() {
+        var pets = Pets.create(vertx);
+        var pet = pets.add(new NewPet("snoopy", "dogs"));
+        var api = Api.create(vertx);
+
+        return pet
+            .onSuccess(p -> snoopy = p)
+            .onSuccess(p -> System.out.println("Pet :" + p))
+            .map(p -> api.withPets(pets));
     }
 
 }

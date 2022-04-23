@@ -146,7 +146,7 @@ paths:
                 $ref: '#/components/schemas/Pet'
       security:
       - NONE: []
-    post:
+    put:
       tags:
       - pet
       description: Update an existing pet

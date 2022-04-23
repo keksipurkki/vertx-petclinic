@@ -35,6 +35,12 @@ final public class PetStore {
         return store.get(pet.status()).remove(pet.id());
     }
 
+    public static Pet update(Pet pet) {
+        var inventory = store.get(pet.status());
+        inventory.put(pet.id(), pet);
+        return pet;
+    }
+
     public static void reserve(int petId) {
         var pet = store.get(Status.AVAILABLE).remove(petId);
 

@@ -8,7 +8,6 @@ import net.keksipurkki.petstore.api.ApiException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class InvalidJsonException extends ApiException {
     private final Set<ConstraintViolation<Object>> violations;
@@ -39,7 +38,7 @@ public class InvalidJsonException extends ApiException {
         var json = super.toJson();
         if (!violations.isEmpty()) {
             var v = new ArrayList<JsonObject>();
-            for (var violation: violations) {
+            for (var violation : violations) {
                 var reason = violation.getMessage();
                 var property = violation.getPropertyPath();
                 var invalid = violation.getInvalidValue();

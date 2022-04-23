@@ -76,7 +76,8 @@ public enum ApiOperation implements Handler<RoutingContext> {
             case ADD_PET -> api.addPet(newPetRecord(params));
             case GET_PET -> api.getPetById(petId(params));
             case UPDATE_PET -> api.updatePet(petId(params), pet(params));
-            case UPLOAD_IMAGE -> api.uploadFile(petId(params), fileUpload(rc.fileUploads(), "file"), formData(params, "additionalMetadata"));
+            case UPLOAD_IMAGE ->
+                api.uploadFile(petId(params), fileUpload(rc.fileUploads(), "file"), formData(params, "additionalMetadata"));
             case DELETE_PET -> api.deletePet(petId(params));
         };
 

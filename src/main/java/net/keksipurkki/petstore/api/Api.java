@@ -1,6 +1,7 @@
 package net.keksipurkki.petstore.api;
 
 import io.vertx.core.Future;
+import io.vertx.core.Vertx;
 import io.vertx.ext.web.FileUpload;
 import net.keksipurkki.petstore.http.BadRequestException;
 import net.keksipurkki.petstore.http.ForbiddenException;
@@ -143,7 +144,9 @@ public class Api implements ApiContract {
 
     @Override
     public Future<Pet> updatePet(int petId, Pet pet) {
-        return null;
+        return pets.getById(petId)
+                   .map(opt -> opt.orElseThrow(() -> new NotFoundException("Pet " + petId + " does not exist")))
+                   .flatMap(v -> pets.update(pet));
     }
 
     @Override
@@ -182,6 +185,7 @@ public class Api implements ApiContract {
         clone.users = requireNonNull(users, "Users service must be defined");
         clone.orders = orders;
         clone.context = context;
+        clone.pets = pets;
         return clone;
     }
 
@@ -210,6 +214,13 @@ public class Api implements ApiContract {
         clone.orders = orders;
         clone.context = context;
         return clone;
+    }
+
+    public static Api create(Vertx vertx) {
+        return new Api()
+            .withPets(Pets.create(vertx))
+            .withOrders(Orders.create(vertx))
+            .withUsers(Users.create(vertx));
     }
 
 }

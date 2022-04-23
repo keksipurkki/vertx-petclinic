@@ -4,7 +4,11 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import net.keksipurkki.petstore.api.Api;
 import net.keksipurkki.petstore.http.HttpVerticle;
+import net.keksipurkki.petstore.pet.Pets;
+import net.keksipurkki.petstore.store.Orders;
+import net.keksipurkki.petstore.user.Users;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +44,12 @@ public class Main extends AbstractVerticle {
 
     private void deployVerticles(Promise<Void> promise) {
         var future = Future.succeededFuture();
+
+
+        var api = Api.create(vertx);
         var server = new HttpVerticle();
+        server.withApi(api);
+
         future
             .flatMap(v -> vertx.deployVerticle(server))
             .flatMap(v -> server.listen(8080))
