@@ -83,12 +83,9 @@ public final class Middlewares {
 
     public static Handler<RoutingContext> jwtVerification(ApiOperation operation) {
         logger.trace("Mounting authentication handler for {}", operation);
-        if (operation.getSecurityScheme().equals(SecurityScheme.NONE)) {
-            logger.trace("Operation {} will be executed in anonymous context", operation);
-            return RoutingContext::next;
-        } else {
-            logger.trace("Operation {} will be executed in authenticated context", operation);
-            return AuthenticationHandler.create();
-        }
+        return switch (operation.getSecurityScheme()) {
+            case NONE -> RoutingContext::next;
+            case LOGIN_SESSION -> AuthenticationHandler.create();
+        };
     }
 }
