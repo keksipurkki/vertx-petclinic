@@ -62,8 +62,8 @@ public class Api implements ApiContract {
     @Override
     public Future<User> getUserByName(String username) {
         return users.findByUsername(username)
-                    .map(opt -> opt.orElseThrow(() -> new NotFoundException("User " + username + " does not exist")))
-                    .map(User::redactCredentials);
+            .map(opt -> opt.orElseThrow(() -> new NotFoundException("User " + username + " does not exist")))
+            .map(User::redactCredentials);
     }
 
     @Override
@@ -86,16 +86,16 @@ public class Api implements ApiContract {
     @Override
     public Future<AccessToken> login(String username, String password) {
         return this.users.findByUsername(username)
-                         .map(opt -> opt.orElseThrow(() -> new NotFoundException("User " + username + " does not exist")))
-                         .map(user -> {
+            .map(opt -> opt.orElseThrow(() -> new NotFoundException("User " + username + " does not exist")))
+            .map(user -> {
 
-                             if (!user.verifyPassword(password)) {
-                                 throw new ForbiddenException("Invalid password");
-                             }
+                if (!user.verifyPassword(password)) {
+                    throw new ForbiddenException("Invalid password");
+                }
 
-                             return JwtPrincipal.from(user.username());
+                return JwtPrincipal.from(user.username());
 
-                         }).map(principal -> new AccessToken(principal.getToken()));
+            }).map(principal -> new AccessToken(principal.getToken()));
     }
 
     @Override
@@ -128,13 +128,13 @@ public class Api implements ApiContract {
     @Override
     public Future<Order> getOrderById(int orderId) {
         return orders.getById(orderId)
-                     .map(opt -> opt.orElseThrow(() -> new NotFoundException("Order " + orderId + " does not exist")));
+            .map(opt -> opt.orElseThrow(() -> new NotFoundException("Order " + orderId + " does not exist")));
     }
 
     @Override
     public Future<Order> deleteOrder(int orderId) {
         return orders.delete(orderId)
-                     .map(opt -> opt.orElseThrow(() -> new NotFoundException("Order " + orderId + " does not exist")));
+            .map(opt -> opt.orElseThrow(() -> new NotFoundException("Order " + orderId + " does not exist")));
     }
 
     @Override
@@ -145,31 +145,31 @@ public class Api implements ApiContract {
     @Override
     public Future<Pet> updatePet(int petId, Pet pet) {
         return pets.getById(petId)
-                   .map(opt -> opt.orElseThrow(() -> new NotFoundException("Pet " + petId + " does not exist")))
-                   .flatMap(v -> pets.update(pet));
+            .map(opt -> opt.orElseThrow(() -> new NotFoundException("Pet " + petId + " does not exist")))
+            .flatMap(v -> pets.update(pet));
     }
 
     @Override
     public Future<Pet> getPetById(int petId) {
         return pets.getById(petId)
-                   .map(opt -> opt.orElseThrow(() -> new NotFoundException("Pet " + petId + " does not exist")));
+            .map(opt -> opt.orElseThrow(() -> new NotFoundException("Pet " + petId + " does not exist")));
     }
 
     @Override
     public Future<Pet> deletePet(int petId) {
         return pets.delete(petId)
-                   .map(opt -> opt.orElseThrow(() -> new NotFoundException("Pet " + petId + " does not exist")));
+            .map(opt -> opt.orElseThrow(() -> new NotFoundException("Pet " + petId + " does not exist")));
     }
 
     @Override
     public Future<ApiMessage> uploadFile(int petId, FileUpload upload, String metadata) {
         return pets.getById(petId)
-                   .map(opt -> opt.orElseThrow(() -> new NotFoundException("Pet " + petId + " does not exist")))
-                   .flatMap(pet -> pets.update(pet, petImage(upload, metadata)))
-                   .map(pet -> {
-                       var message = "Pet image was uploaded successfully";
-                       return new ApiMessage(message);
-                   });
+            .map(opt -> opt.orElseThrow(() -> new NotFoundException("Pet " + petId + " does not exist")))
+            .flatMap(pet -> pets.update(pet, petImage(upload, metadata)))
+            .map(pet -> {
+                var message = "Pet image was uploaded successfully";
+                return new ApiMessage(message);
+            });
     }
 
     private PetImage petImage(FileUpload upload, String metadata) {

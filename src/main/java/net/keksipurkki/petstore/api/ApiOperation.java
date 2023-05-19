@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.Set;
 
 import static java.util.Objects.nonNull;
 
@@ -93,8 +92,8 @@ public enum ApiOperation implements Handler<RoutingContext> {
 
     private FileUpload fileUpload(List<FileUpload> uploads, String file) {
         return uploads.stream().filter(u -> u.name().equals(file))
-                      .findFirst()
-                      .orElseThrow(() -> new UnexpectedApiException("File not present in the request", null));
+            .findFirst()
+            .orElseThrow(() -> new UnexpectedApiException("File not present in the request", null));
     }
 
     private String formData(RequestParameters params, String key) {
@@ -124,9 +123,9 @@ public enum ApiOperation implements Handler<RoutingContext> {
     private <T> Handler<T> respond(RoutingContext rc) {
         return value -> {
             rc.response()
-              .setStatusCode(200)
-              .putHeader("content-type", "application/json")
-              .end(Json.stringify(value, true));
+                .setStatusCode(200)
+                .putHeader("content-type", "application/json")
+                .end(Json.stringify(value, true));
         };
     }
 

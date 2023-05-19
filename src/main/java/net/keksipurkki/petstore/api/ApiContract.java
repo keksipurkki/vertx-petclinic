@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.servers.Server;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.vertx.core.Future;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.web.FileUpload;
 import jakarta.validation.constraints.Min;
 import jakarta.ws.rs.*;
