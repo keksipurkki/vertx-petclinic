@@ -41,7 +41,11 @@ public class JwtPrincipal implements Principal {
                 throw new SecurityException("Invalid signature");
             }
 
-            // TODO: JWT Claims Verification...
+            var claims = signed.getJWTClaimsSet();
+
+            if (!claims.getBooleanClaim("verifyMe")) {
+                throw new SecurityException("Invalid token claims");
+            }
 
             this.jwt = jwt;
             this.name = signed.getJWTClaimsSet().getSubject();
@@ -69,6 +73,7 @@ public class JwtPrincipal implements Principal {
 
             var claims = new JWTClaimsSet.Builder()
                 .subject(subject)
+                .claim("verifyMe", true)
                 .expirationTime(new Date(new Date().getTime() + SESSION_TTL))
                 .build();
 
