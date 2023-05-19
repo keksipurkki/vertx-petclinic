@@ -91,7 +91,7 @@ public enum ApiOperation implements Handler<RoutingContext> {
 
     }
 
-    private FileUpload fileUpload(Set<FileUpload> uploads, String file) {
+    private FileUpload fileUpload(List<FileUpload> uploads, String file) {
         return uploads.stream().filter(u -> u.name().equals(file))
                       .findFirst()
                       .orElseThrow(() -> new UnexpectedApiException("File not present in the request", null));
